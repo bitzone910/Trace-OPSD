@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# Generated indexes and local model/data caches.
+index/*
+!index/.gitkeep
+.cache/
+huggingface_cache/
+
+# Keep the small example, but do not commit private/full corpora by default.
+corpus/*.jsonl
+!corpus/my_corpus.jsonl
+search_r1_corpus.jsonl
+math_corpus.jsonl

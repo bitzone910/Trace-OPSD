@@ -1,0 +1,18 @@
+# AutoDL baseline selected for this project.
+torch==2.5.1
+
+# Search-R1-compatible E5 encoding stack.
+transformers>=4.46,<4.48
+datasets>=3.1,<4
+numpy>=1.26,<3
+tqdm>=4.66,<5
+
+# FAISS is intentionally not installed by pip. Install the CUDA 12.4 build with:
+# conda install -c pytorch -c nvidia -c rapidsai -c conda-forge \
+#   libnvjitlink faiss-gpu-cuvs=1.12.0 cuda-version=12.4
+
+# HTTP service and example client.
+fastapi>=0.115,<1
+uvicorn>=0.32,<1
+pydantic>=2.9,<3
+requests>=2.32,<3

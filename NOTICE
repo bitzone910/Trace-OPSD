@@ -1,0 +1,6 @@
+This product includes retrieval code adapted from Search-R1.
+
+Copyright 2023-2024 Bytedance Ltd. and/or its affiliates
+
+The adapted files have been modified to remove training integrations, support
+CPU/CUDA device selection, validate user corpora, and expose a standalone API.

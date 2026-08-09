@@ -1,0 +1,32 @@
+name: retriever
+
+channels:
+  - pytorch
+  - nvidia
+  - rapidsai
+  - conda-forge
+
+dependencies:
+  # AutoDL / Ubuntu 22.04 baseline.
+  - python=3.12
+  - pip
+
+  # E5 embedding runs on the GPU. pytorch-cuda supplies the CUDA runtime;
+  # the host NVIDIA driver must already support CUDA 12.4.
+  - pytorch=2.5.1
+  - pytorch-cuda=12.4
+
+  # GPU FAISS + NVIDIA cuVS, pinned to the CUDA 12.4 build for A800.
+  - cuda-version=12.4
+  - libnvjitlink
+  - faiss-gpu-cuvs=1.12.0
+  - numpy=1.26.4
+
+  - pip:
+      - transformers==4.47.1
+      - datasets==3.2.0
+      - tqdm==4.67.1
+      - fastapi==0.115.6
+      - uvicorn==0.34.0
+      - pydantic==2.10.4
+      - requests==2.32.3
