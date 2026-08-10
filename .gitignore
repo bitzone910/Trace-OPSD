@@ -5,13 +5,15 @@ __pycache__/
 .mypy_cache/
 
 # Generated indexes and local model/data caches.
-index/*
-!index/.gitkeep
+general_search_database/index/*
+!general_search_database/index/.gitkeep
+theorem_search_database/index/*
+!theorem_search_database/index/.gitkeep
 .cache/
 huggingface_cache/
 
-# Keep the small example, but do not commit private/full corpora by default.
-corpus/*.jsonl
-!corpus/my_corpus.jsonl
-search_r1_corpus.jsonl
-math_corpus.jsonl
+# Keep the small examples, but not the full corpora.
+general_search_database/corpus/*.jsonl
+!general_search_database/corpus/sample_corpus.jsonl
+theorem_search_database/corpus/*.jsonl
+!theorem_search_database/corpus/sample_corpus.jsonl

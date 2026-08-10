@@ -1,171 +1,81 @@
-# Search-R1 独立本地 Dense 检索组件
+# ToolElite 双检索数据库
 
-这个项目只保留 Search-R1 的本地 `e5 + FAISS` 检索链路：输入一条或多条 query，从自己的 JSONL 知识库返回 top-k 条 `{id, contents, score}` 记录。
+ToolElite 提供两个相互独立、共享同一套 E5 模型与运行环境的本地 dense retrieval
+数据库：
 
-它不包含 veRL、PPO/GRPO、policy/value/reward model、vLLM rollout、训练 prompt、在线搜索、BM25/Pyserini 或 wiki-18 下载代码。运行时只会加载用于检索的 E5 embedding 模型。
+- **General Search Database**：query 直接检索 Search-R1 corpus 的 `contents`。
+- **Theorem Search Database**：query 先检索 top20 个唯一 `slogan`，展开对应的全部
+  `contents` 后再进行第二次相似度排序。
 
-## 核心行为
+两者都使用 E5 query/passage 前缀、attention-mask mean pooling、L2 归一化和
+FAISS inner product。服务返回的结构统一为 `{id, contents, score}`。
 
-实现保持 Search-R1 的 dense 检索逻辑：
-
-1. 文档编码前添加 `passage: `，query 编码前添加 `query: `。
-2. 对最后一层 hidden state 做 attention-mask mean pooling。
-3. 对向量做 L2 归一化。
-4. 使用 FAISS inner product 搜索，因此归一化后等价于 cosine similarity 排序。
-5. FAISS 向量编号与 JSONL 行号严格对应；检索后按原行取回 `id` 和 `contents`。
-
-## 项目结构
+## 目录结构
 
 ```text
-.
-├── README.md
-├── environment.yml          # 推荐的一键 Conda 环境
-├── retriever_requirements.txt
-├── retriever.py
-├── build_index.py
-├── retrieval_server.py
-├── test_query.py
-├── search_r1_corpus.jsonl    # 你的真实语料（本地已有，不纳入版本控制）
-├── corpus/
-│   └── my_corpus.jsonl       # 小样本
-└── index/                    # 生成的 FAISS 索引
+ToolElite/
+├── shared/                         # 公共 E5、FAISS、校验与配置
+├── general_search_database/
+│   ├── build_index.py
+│   ├── retriever.py
+│   ├── retrieval_server.py
+│   ├── test_query.py
+│   ├── corpus/
+│   │   ├── sample_corpus.jsonl
+│   │   └── search_r1_corpus.jsonl  # 完整语料，不纳入 Git
+│   └── index/                      # 生成的 general FAISS 索引
+├── theorem_search_database/
+│   ├── build_index.py
+│   ├── retriever.py
+│   ├── retrieval_server.py
+│   ├── test_query.py
+│   ├── corpus/
+│   │   ├── sample_corpus.jsonl
+│   │   └── math_corpus.jsonl       # 完整语料，不纳入 Git
+│   └── index/                      # 生成的 theorem index bundle
+├── models/e5-base-v2/             # 两个数据库共同使用的默认模型
+├── tests/
+├── environment.yml
+└── retriever_requirements.txt
 ```
 
-## 数据格式
+所有 Python 入口都应从项目根目录通过 `python -m ...` 执行。旧的根目录脚本和
+旧 import 路径不再保留。
 
-语料必须是 UTF-8 JSON Lines 文件，每行一个 JSON 对象，至少包含：
+## 环境
 
-```json
-{"id": "doc-001", "contents": "Document title\nDocument body"}
-```
-
-- `id` 不能是 `null`，其原始 JSON 类型会保留在结果中。
-- `contents` 必须是字符串。
-- 建索引后不能调整、插入、删除或重排 JSONL 行；任何语料变化都必须重新建索引。
-
-当前目录下的 `search_r1_corpus.jsonl` 可以直接作为完整语料使用；`corpus/my_corpus.jsonl` 仅用于小规模验证。
-
-## AutoDL 环境安装
-
-目标基线：AutoDL Ubuntu 22.04、NVIDIA A800、Python 3.12、PyTorch 2.5.1、CUDA 12.4、`faiss-gpu-cuvs=1.12.0`。推荐使用项目提供的 Conda YAML 一键创建隔离环境：
+推荐环境为 AutoDL Ubuntu 22.04、Python 3.12、PyTorch 2.5.1、CUDA 12.4 和
+`faiss-gpu-cuvs=1.12.0`：
 
 ```bash
 conda env create -f environment.yml
 conda activate retriever
 ```
 
-如果已经存在同名环境，请不要直接混装或更新。确认旧环境不再需要后先删除并重建：
+`environment.yml` 同时服务两个数据库。默认模型为项目内的
+`models/e5-base-v2`；各入口仍可用 `--model_path` 或 `--retriever_model` 覆盖。
+不要额外安装 `faiss-cpu`，它会与 Conda 中的 GPU FAISS 冲突。
+
+## General Search Database
+
+构建索引：
 
 ```bash
-conda env remove -n retriever
-conda env create -f environment.yml
-conda activate retriever
-```
-
-创建完成后验证环境：
-
-```bash
-python - <<'PY'
-import numpy as np
-import torch
-import faiss
-import transformers
-import datasets
-import fastapi
-import uvicorn
-
-print("Python environment: OK")
-print("PyTorch:", torch.__version__)
-print("PyTorch CUDA runtime:", torch.version.cuda)
-print("CUDA available:", torch.cuda.is_available())
-if torch.cuda.is_available():
-    print("CUDA device:", torch.cuda.get_device_name(0))
-
-assert torch.cuda.is_available()
-assert faiss.get_num_gpus() > 0
-cpu_index = faiss.IndexFlatIP(2)
-index = faiss.index_cpu_to_all_gpus(cpu_index)
-index.add(np.asarray([[1.0, 0.0]], dtype=np.float32))
-scores, ids = index.search(np.asarray([[1.0, 0.0]], dtype=np.float32), 1)
-assert ids.tolist() == [[0]]
-print("FAISS:", faiss.__version__)
-print("FAISS GPUs:", faiss.get_num_gpus())
-print("FAISS GPU smoke test: OK", scores.tolist())
-print("Transformers:", transformers.__version__)
-print("Datasets:", datasets.__version__)
-print("FastAPI:", fastapi.__version__)
-print("Uvicorn:", uvicorn.__version__)
-PY
-```
-
-`environment.yml` 固定使用 `pytorch=2.5.1`、`pytorch-cuda=12.4`、`cuda-version=12.4` 和 `faiss-gpu-cuvs=1.12.0`。E5 embedding 会在 `--device auto --use_fp16` 下使用 CUDA，Flat FAISS 建索引与查询也默认使用全部可见 GPU。A800 支持该 CUDA 12.4 运行栈。
-
-YAML 不安装 Linux NVIDIA 驱动。云服务器必须预先具备兼容 CUDA 12.4 的宿主机驱动。`retriever_requirements.txt` 只安装 Python 层依赖；FAISS 必须通过 Conda 安装，不能用该文件中的 pip 命令替代。
-
-不要在该环境中另外安装 `faiss-cpu`，它会与 `faiss-gpu-cuvs` 冲突。需要手动安装时使用：
-
-```bash
-conda install -c pytorch -c nvidia -c rapidsai -c conda-forge \
-  libnvjitlink faiss-gpu-cuvs=1.12.0 cuda-version=12.4
-```
-
-
-## 构建索引
-
-### 先用小样本验证
-
-```bash
-python build_index.py \
-  --corpus_path corpus/my_corpus.jsonl \
-  --save_dir index \
+python -m general_search_database.build_index \
+  --corpus_path general_search_database/corpus/search_r1_corpus.jsonl \
+  --save_dir general_search_database/index \
   --faiss_type Flat \
-  --model_path intfloat/e5-base-v2 \
-  --device auto \
-  --use_fp16
-```
-
-输出文件为 `index/e5_Flat.index`。Flat 索引默认在 GPU 上构建，保存前会转换为可移植的 CPU 索引文件。如果需要临时进行纯 CPU 调试，去掉 `--use_fp16`，使用 `--device cpu --no-faiss_gpu`。
-
-### 使用已有完整语料
-
-```bash
-python build_index.py \
-  --corpus_path search_r1_corpus.jsonl \
-  --save_dir index \
-  --faiss_type Flat \
-  --model_path intfloat/e5-base-v2 \
   --device auto \
   --use_fp16 \
   --batch_size 128
 ```
 
-已有同名索引时脚本会拒绝覆盖。确认要基于当前语料重建后，增加 `--overwrite`。
-
-`build_index.py` 与原 Search-R1 一样，会先生成全部文档 embedding，再建立索引。完整语料需要足够的主机内存和磁盘空间；显存不足时调小 `--batch_size`。
-
-### HNSW64 近似索引
+启动服务：
 
 ```bash
-python build_index.py \
-  --corpus_path search_r1_corpus.jsonl \
-  --save_dir index \
-  --faiss_type HNSW64 \
-  --device auto \
-  --use_fp16 \
-  --no-faiss_gpu
-```
-
-输出为 `index/e5_HNSW64.index`。HNSW64 使用 CPU 构建，必须传入 `--no-faiss_gpu`；当前面向 A800 的默认运行方式仍是 Flat GPU 索引。
-
-## 启动服务
-
-小样本 Flat 索引示例：
-
-```bash
-python retrieval_server.py \
-  --index_path index/e5_Flat.index \
-  --corpus_path corpus/my_corpus.jsonl \
-  --retriever_model intfloat/e5-base-v2 \
+python -m general_search_database.retrieval_server \
+  --index_path general_search_database/index/e5_Flat.index \
+  --corpus_path general_search_database/corpus/search_r1_corpus.jsonl \
   --device auto \
   --use_fp16 \
   --topk 3 \
@@ -173,19 +83,53 @@ python retrieval_server.py \
   --port 8000
 ```
 
-完整语料只需将 `--corpus_path` 改为 `search_r1_corpus.jsonl`，并传入由该文件生成的索引。服务默认将 Flat 索引载入全部可见 GPU；使用 `CUDA_VISIBLE_DEVICES` 可以限制所用卡。建索引和启动服务必须使用同一个 E5 模型，否则脚本会在向量维度不一致时拒绝启动；即使维度相同，换模型也会使检索结果无效。
+## Theorem Search Database
 
-健康检查：
+`math_corpus.jsonl` 每行格式为：
 
-```bash
-curl http://127.0.0.1:8000/health
+```json
+{"id":"0","contents":"theorem text","slogan":"semantic summary"}
 ```
 
-响应中的 `embedding_device` 应为 `cuda`，`faiss_version` 应为 `1.12.0`，`faiss_device` 应为 `gpu`，`faiss_gpus` 是 FAISS 当前可见的 GPU 数量。
+构建索引 bundle：
 
-## 发起查询
+```bash
+python -m theorem_search_database.build_index \
+  --corpus_path theorem_search_database/corpus/math_corpus.jsonl \
+  --save_dir theorem_search_database/index \
+  --faiss_type Flat \
+  --device auto \
+  --use_fp16 \
+  --batch_size 128
+```
 
-### curl
+生成的 `theorem_search_database/index/e5_Flat/` 包含：
+
+- `slogan.index`：每个唯一 slogan 一个向量；
+- `content_embeddings.npy`：按 corpus 行号对齐的 float32 contents 向量；
+- `slogan_offsets.npy` 与 `content_row_ids.npy`：slogan 到所有 contents 的映射；
+- `manifest.json`：行数、维度、索引类型和模型信息。
+
+启动服务：
+
+```bash
+python -m theorem_search_database.retrieval_server \
+  --index_dir theorem_search_database/index/e5_Flat \
+  --corpus_path theorem_search_database/corpus/math_corpus.jsonl \
+  --device auto \
+  --use_fp16 \
+  --slogan_topk 20 \
+  --topk 3 \
+  --host 127.0.0.1 \
+  --port 8001
+```
+
+`--slogan_topk` 默认是 20，只能在服务启动时设置；单次 HTTP 请求不能修改。
+第二阶段只对展开后的候选 contents 排名。当候选数量小于 topk 时返回全部候选。
+
+## API
+
+两个服务都提供：
 
 ```bash
 curl -X POST http://127.0.0.1:8000/retrieve \
@@ -193,54 +137,37 @@ curl -X POST http://127.0.0.1:8000/retrieve \
   -d '{"queries":["What is mathematics?"],"topk":3,"return_scores":true}'
 ```
 
-响应结构：
+Theorem 服务将端口改为 8001。响应结构一致：
 
 ```json
 {
   "result": [
     [
-      {
-        "id": "math-001",
-        "contents": "\"Mathematics\"\nMathematics studies ...",
-        "score": 0.87
-      }
+      {"id": "doc-id", "contents": "document text", "score": 0.87}
     ]
   ]
 }
 ```
 
-`queries` 可以包含多条 query。省略 `topk` 时使用服务启动参数的默认值；设置 `return_scores: false` 会从结果中移除 `score`。
+`queries` 支持批量请求。设置 `return_scores: false` 会移除 `score`。General 的
+topk 大于 corpus 行数时返回全部文档；Theorem 的 topk 大于第二阶段候选数时返回
+全部候选。
 
-### 测试脚本
+## CPU 小语料验证与测试
+
+将构建命令的 corpus 改为对应目录下的 `sample_corpus.jsonl`，并使用
+`--device cpu --no-faiss_gpu`（不要传 `--use_fp16`）。运行依赖较轻的核心测试：
 
 ```bash
-python test_query.py --query "What is mathematics?" --topk 3
+pytest -q
 ```
 
-### Python 直接调用
+安装完整环境后，可以额外运行真实本地模型与 CPU FAISS 的小语料集成测试：
 
-```python
-from retriever import DenseRetriever
-
-retriever = DenseRetriever(
-    index_path="index/e5_Flat.index",
-    corpus_path="corpus/my_corpus.jsonl",
-    model_path="intfloat/e5-base-v2",
-    device="auto",
-    use_fp16=True,
-)
-
-results = retriever.search("What is mathematics?", topk=3)
-print(results)
+```bash
+RUN_RETRIEVAL_INTEGRATION=1 pytest -q -m integration
 ```
 
-CPU 调试时设置 `device="cpu", use_fp16=False, faiss_gpu=False`；A800 部署无需传 `faiss_gpu`，默认值就是 `True`。
-
-## 常见错误
-
-- **Index/corpus size mismatch**：索引不是由当前 JSONL 文件构建，或语料行数已变化。重新建索引。
-- **Model/index dimension mismatch**：服务使用了不同维度的 embedding 模型。使用建索引时的模型。
-- **CUDA requested but unavailable**：确认 A800 已分配给实例、驱动可用且 `CUDA_VISIBLE_DEVICES` 未屏蔽设备；仅做 CPU 调试时使用 `--device cpu --no-faiss_gpu` 并移除 `--use_fp16`。
-- **GPU FAISS APIs are unavailable**：环境中装错了 `faiss-cpu`，删除并按上面的 Conda 命令安装 `faiss-gpu-cuvs=1.12.0`。
-- **显存不足**：调小 `--batch_size` 或用 `CUDA_VISIBLE_DEVICES` 调整可见卡；必要时使用 `--no-faiss_gpu` 让 FAISS 查询回退到 CPU。
-
+完整 corpus 会生成数 GB 的索引/embedding 文件，需要足够的磁盘、内存和 GPU
+资源。HNSW64 仍受支持，但必须通过 `--faiss_type HNSW64 --no-faiss_gpu` 在 CPU
+上构建和查询。

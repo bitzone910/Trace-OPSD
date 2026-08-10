@@ -1,8 +1,0 @@
-{"id":"math-001","contents":"\"Mathematics\"\nMathematics studies numbers, quantities, structures, shapes, and change."}
-{"id":"physics-001","contents":"\"Physics\"\nPhysics studies matter, energy, motion, forces, space, and time."}
-{"id":"python-001","contents":"\"Python programming language\"\nPython is a general-purpose programming language known for readable syntax."}
-{"id":"ai-001","contents":"\"Artificial intelligence\"\nArtificial intelligence is the field of building machines that perform tasks associated with human intelligence."}
-{"id":"retrieval-001","contents":"\"Information retrieval\"\nInformation retrieval finds documents relevant to a user's query from a collection."}
-{"id":"faiss-001","contents":"\"FAISS\"\nFAISS is a library for efficient similarity search over dense vectors."}
-{"id":"e5-001","contents":"\"E5 embeddings\"\nE5 models encode queries and passages into normalized dense vector representations for retrieval."}
-{"id":"search-r1-001","contents":"\"Search-R1\"\nSearch-R1 trains language models to reason and use search engines, while its local retrieval service runs separately from training."}
