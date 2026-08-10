@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
+from threading import RLock
 from typing import Any
 
 import faiss
@@ -43,6 +44,7 @@ class DenseRetriever:
         faiss_gpu: bool = True,
         batch_size: int = 128,
         corpus_num_proc: int = 4,
+        encoder: E5Encoder | None = None,
     ) -> None:
         if batch_size <= 0:
             raise ValueError("batch_size must be greater than zero")
@@ -57,6 +59,7 @@ class DenseRetriever:
         self.faiss_gpu_count = 0
         if faiss_gpu:
             self.index, self.faiss_gpu_count = move_index_to_gpu(self.index)
+        self._index_lock = RLock()
 
         self.corpus = load_corpus(corpus_path, num_proc=corpus_num_proc)
         if int(self.index.ntotal) != len(self.corpus):
@@ -67,7 +70,7 @@ class DenseRetriever:
                 "corpus file and preserve JSONL row order."
             )
 
-        self.encoder = E5Encoder(
+        self.encoder = encoder or E5Encoder(
             model_path,
             device=device,
             max_length=max_length,
@@ -76,7 +79,7 @@ class DenseRetriever:
         validate_embedding_dimension(
             int(self.index.d),
             self.encoder.embedding_dimension,
-            model_path,
+            self.encoder.model_path,
         )
         self.batch_size = batch_size
 
@@ -103,7 +106,8 @@ class DenseRetriever:
         validate_query(query)
         search_topk = effective_topk(topk, int(self.index.ntotal))
         query_embedding = self.encoder.encode(query, is_query=True)
-        scores, indices = self.index.search(query_embedding, search_topk)
+        with self._index_lock:
+            scores, indices = self.index.search(query_embedding, search_topk)
         return self._format_hits(indices[0].tolist(), scores[0].tolist())
 
     def batch_search(
@@ -127,10 +131,11 @@ class DenseRetriever:
         ):
             query_batch = query_list[start : start + self.batch_size]
             embeddings = self.encoder.encode(query_batch, is_query=True)
-            batch_scores, batch_indices = self.index.search(
-                embeddings,
-                search_topk,
-            )
+            with self._index_lock:
+                batch_scores, batch_indices = self.index.search(
+                    embeddings,
+                    search_topk,
+                )
             for indices, scores in zip(batch_indices, batch_scores):
                 all_results.append(
                     self._format_hits(indices.tolist(), scores.tolist())

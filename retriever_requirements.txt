@@ -11,11 +11,7 @@ tqdm>=4.66,<5
 # conda install -c pytorch -c nvidia -c rapidsai -c conda-forge \
 #   libnvjitlink faiss-gpu-cuvs=1.12.0 cuda-version=12.4
 
-# HTTP service and example client.
+# HTTP service.
 fastapi>=0.115,<1
 uvicorn>=0.32,<1
 pydantic>=2.9,<3
-requests>=2.32,<3
-
-# Test runner for dependency-light unit tests.
-pytest>=8,<9

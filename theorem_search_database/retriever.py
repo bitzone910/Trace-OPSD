@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
+from threading import RLock
 from typing import Any
 
 import faiss
@@ -50,6 +51,7 @@ class TheoremRetriever:
         batch_size: int = 128,
         corpus_num_proc: int = 4,
         slogan_topk: int = 20,
+        encoder: E5Encoder | None = None,
     ) -> None:
         if batch_size <= 0:
             raise ValueError("batch_size must be greater than zero")
@@ -70,6 +72,7 @@ class TheoremRetriever:
         self.faiss_gpu_count = 0
         if faiss_gpu:
             self.index, self.faiss_gpu_count = move_index_to_gpu(self.index)
+        self._index_lock = RLock()
 
         self.corpus = load_corpus(
             corpus_path,
@@ -87,7 +90,7 @@ class TheoremRetriever:
         )
 
         self._validate_bundle()
-        self.encoder = E5Encoder(
+        self.encoder = encoder or E5Encoder(
             model_path,
             device=device,
             max_length=max_length,
@@ -96,7 +99,7 @@ class TheoremRetriever:
         validate_embedding_dimension(
             int(self.index.d),
             self.encoder.embedding_dimension,
-            model_path,
+            self.encoder.model_path,
         )
         self.batch_size = batch_size
         self.slogan_topk = slogan_topk
@@ -170,7 +173,8 @@ class TheoremRetriever:
         ):
             query_batch = query_list[start : start + self.batch_size]
             embeddings = self.encoder.encode(query_batch, is_query=True)
-            _, group_ids = self.index.search(embeddings, first_stage_topk)
+            with self._index_lock:
+                _, group_ids = self.index.search(embeddings, first_stage_topk)
             for embedding, query_group_ids in zip(embeddings, group_ids):
                 all_results.append(
                     self._search_from_embedding(

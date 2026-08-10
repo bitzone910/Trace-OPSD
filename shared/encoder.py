@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from threading import RLock
 
 import numpy as np
 import torch
@@ -58,6 +59,7 @@ class E5Encoder:
         self.device = resolve_device(device)
         self.max_length = max_length
         self.use_fp16 = use_fp16
+        self._encode_lock = RLock()
         if use_fp16 and self.device.type != "cuda":
             raise ValueError("FP16 encoding is only supported on a CUDA device")
 
@@ -84,6 +86,15 @@ class E5Encoder:
 
     @torch.inference_mode()
     def encode(
+        self,
+        texts: str | Sequence[str],
+        *,
+        is_query: bool,
+    ) -> np.ndarray:
+        with self._encode_lock:
+            return self._encode_unlocked(texts, is_query=is_query)
+
+    def _encode_unlocked(
         self,
         texts: str | Sequence[str],
         *,
@@ -121,7 +132,4 @@ class E5Encoder:
             order="C",
         )
 
-        del device_inputs, output, embeddings
-        if self.device.type == "cuda":
-            torch.cuda.empty_cache()
         return array
