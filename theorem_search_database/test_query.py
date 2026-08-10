@@ -1,4 +1,4 @@
-"""Send one query to a running retrieval_server.py instance."""
+"""Send one query to a running Theorem Search Database service."""
 
 from __future__ import annotations
 
@@ -9,16 +9,12 @@ import requests
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Query the local retrieval API.")
-    parser.add_argument("--query", default="What is mathematics?")
+    parser = argparse.ArgumentParser(description="Query Theorem Search Database.")
+    parser.add_argument("--query", default="When is a module flat?")
     parser.add_argument("--topk", type=int, default=3)
-    parser.add_argument("--url", default="http://127.0.0.1:8000/retrieve")
+    parser.add_argument("--url", default="http://127.0.0.1:8001/retrieve")
     parser.add_argument("--timeout", type=float, default=60.0)
-    parser.add_argument(
-        "--no_scores",
-        action="store_true",
-        help="Ask the server to omit similarity scores.",
-    )
+    parser.add_argument("--no_scores", action="store_true")
     return parser.parse_args()
 
 
@@ -30,7 +26,6 @@ def main() -> None:
         raise ValueError("topk must be greater than zero")
     if args.timeout <= 0:
         raise ValueError("timeout must be greater than zero")
-
     response = requests.post(
         args.url,
         json={

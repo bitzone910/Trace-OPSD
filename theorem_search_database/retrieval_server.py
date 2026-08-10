@@ -1,6 +1,4 @@
-# Adapted from Search-R1 under Apache-2.0.
-# Modified to expose a training-independent validated HTTP API.
-"""FastAPI service for the standalone Search-R1-style dense retriever."""
+"""FastAPI service for the two-stage theorem search database."""
 
 from __future__ import annotations
 
@@ -12,7 +10,9 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from retriever import DEFAULT_MODEL, DenseRetriever
+from shared.config import DEFAULT_MODEL
+from shared.validation import omit_scores
+from theorem_search_database.retriever import TheoremRetriever
 
 
 class QueryRequest(BaseModel):
@@ -21,10 +21,7 @@ class QueryRequest(BaseModel):
     return_scores: bool = True
 
 
-app = FastAPI(
-    title="Search-R1 Standalone Dense Retriever",
-    version="1.0.0",
-)
+app = FastAPI(title="Theorem Search Database", version="1.0.0")
 
 
 @app.get("/health")
@@ -34,7 +31,10 @@ def health(request: Request) -> dict[str, Any]:
         raise HTTPException(status_code=503, detail="Retriever is not initialized")
     return {
         "status": "ok",
-        "documents": int(retriever.index.ntotal),
+        "database": "theorem",
+        "documents": len(retriever.corpus),
+        "unique_slogans": int(retriever.index.ntotal),
+        "slogan_topk": retriever.slogan_topk,
         "device": str(retriever.encoder.device),
         "embedding_device": str(retriever.encoder.device),
         "faiss_version": getattr(faiss, "__version__", "unknown"),
@@ -48,33 +48,28 @@ def retrieve(request_body: QueryRequest, request: Request) -> dict[str, Any]:
     retriever = getattr(request.app.state, "retriever", None)
     if retriever is None:
         raise HTTPException(status_code=503, detail="Retriever is not initialized")
-
-    topk = request_body.topk or request.app.state.default_topk
+    topk = (
+        request_body.topk
+        if request_body.topk is not None
+        else request.app.state.default_topk
+    )
     try:
         results = retriever.batch_search(request_body.queries, topk=topk)
     except (TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-    if not request_body.return_scores:
-        results = [
-            [
-                {"id": item["id"], "contents": item["contents"]}
-                for item in query_results
-            ]
-            for query_results in results
-        ]
-    return {"result": results}
+    return {
+        "result": results if request_body.return_scores else omit_scores(results)
+    }
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Launch the standalone E5 + FAISS retrieval service."
-    )
-    parser.add_argument("--index_path", required=True)
+    parser = argparse.ArgumentParser(description="Launch Theorem Search Database.")
+    parser.add_argument("--index_dir", required=True)
     parser.add_argument("--corpus_path", required=True)
     parser.add_argument("--retriever_model", default=DEFAULT_MODEL)
-    parser.add_argument("--device", default="auto", help="auto, cpu, cuda, or cuda:N")
+    parser.add_argument("--device", default="auto")
     parser.add_argument("--topk", type=int, default=3)
+    parser.add_argument("--slogan_topk", type=int, default=20)
     parser.add_argument("--max_length", type=int, default=256)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--corpus_num_proc", type=int, default=4)
@@ -83,10 +78,9 @@ def parse_args() -> argparse.Namespace:
         "--faiss_gpu",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Run FAISS on GPU (default). Use --no-faiss_gpu for CPU.",
     )
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=8001)
     return parser.parse_args()
 
 
@@ -94,11 +88,12 @@ def main() -> None:
     args = parse_args()
     if args.topk <= 0:
         raise ValueError("topk must be greater than zero")
+    if args.slogan_topk <= 0:
+        raise ValueError("slogan_topk must be greater than zero")
     if not 1 <= args.port <= 65535:
         raise ValueError("port must be between 1 and 65535")
-
-    app.state.retriever = DenseRetriever(
-        args.index_path,
+    app.state.retriever = TheoremRetriever(
+        args.index_dir,
         args.corpus_path,
         model_path=args.retriever_model,
         device=args.device,
@@ -107,6 +102,7 @@ def main() -> None:
         faiss_gpu=args.faiss_gpu,
         batch_size=args.batch_size,
         corpus_num_proc=args.corpus_num_proc,
+        slogan_topk=args.slogan_topk,
     )
     app.state.default_topk = args.topk
     uvicorn.run(app, host=args.host, port=args.port)
