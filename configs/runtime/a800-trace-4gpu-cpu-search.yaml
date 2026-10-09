@@ -1,0 +1,14 @@
+sft:
+  gpu_count: 4
+
+grpo:
+  gpu_count: 4
+  retrieval_mode: local_cpu
+  rollout_tensor_parallel_size: 1
+
+checkpoint:
+  root: checkpoints
+  sft_keep_last: 2
+  sft_keep_best: false
+  # TRACE retains two latest complete checkpoints plus the best checkpoint.
+  grpo_keep_last: 2

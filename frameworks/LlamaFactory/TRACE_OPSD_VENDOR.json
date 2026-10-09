@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "LlamaFactory",
+  "license": "Apache-2.0",
+  "upstream": {
+    "repository": "https://github.com/hiyouga/LlamaFactory.git",
+    "tag": "v0.9.5",
+    "revision": "7af909522a951e3ad9f022ea6f88b6755257eaa5",
+    "git_tree": "d1538c0c03732ad8453980eb15f4aeb76de4bc7d"
+  },
+  "snapshot": {
+    "algorithm": "trace_opsd-vendor-sha256-v1",
+    "file_count": 539,
+    "sha256": "945663ecdb6400aad8d18ccd92fcc861579c22f20073c3bbc0d724b24878a4d1"
+  }
+}

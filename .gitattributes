@@ -1,0 +1,5 @@
+*.sh text eol=lf
+
+# Sealed inputs and recovery receipts must keep their recorded byte hashes.
+data/evaluation/* -text
+configs/assets/*.json -text

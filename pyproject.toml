@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=79"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trace-opsd"
+version = "0.1.0"
+description = "SFT, turn-level TRACE-OPSD credit assignment, and mathematical evaluation."
+readme = "README.md"
+requires-python = "==3.12.*"
+license = { file = "LICENSE" }
+
+[project.scripts]
+trace-opsd-tool-server = "trace_opsd.tools.service:main"
+trace-opsd-general-index = "trace_opsd.retrieval.general.build_index:main"
+trace-opsd-general-server = "trace_opsd.retrieval.general.retrieval_server:main"
+trace-opsd-sft = "trace_opsd.sft.cli:main"
+trace-opsd-train = "trace_opsd.grpo.cli:main"
+trace-opsd-eval = "trace_opsd.evaluation.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["trace_opsd*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+exclude = ["frameworks/LlamaFactory", "frameworks/verl"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

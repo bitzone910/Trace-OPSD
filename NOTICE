@@ -4,3 +4,25 @@ Copyright 2023-2024 Bytedance Ltd. and/or its affiliates
 
 The adapted files have been modified to remove training integrations, support
 CPU/CUDA device selection, validate user corpora, and expose a standalone API.
+
+This product vendors LlamaFactory v0.9.5 from
+https://github.com/hiyouga/LlamaFactory at commit
+7af909522a951e3ad9f022ea6f88b6755257eaa5.
+
+LlamaFactory is distributed under the Apache License 2.0. Its original LICENSE
+file is preserved at frameworks/LlamaFactory/LICENSE.
+
+This product vendors verl from https://github.com/volcengine/verl at commit
+9c38b8bb1876a81273d76de3e79328b2dd2b7b32. The complete source snapshot,
+upstream attribution and Apache License 2.0 are preserved in frameworks/verl.
+
+This product includes DAPO dynamic group filtering adapted from
+verl-project/verl-recipe, dapo/dapo_ray_trainer.py, at commit
+e477deff97b15d067f8b4e71f75b80ae58ad64c4.
+
+Copyright 2024 Bytedance Ltd. and/or its affiliates
+
+The Apache License 2.0 header and source attribution are preserved in
+trace_opsd/grpo/dynamic_sampling.py. The adaptation requires complete binary
+reward groups and exact difficulty quotas, and does not reuse upstream's
+singleton exception or other DAPO loss/reward changes.

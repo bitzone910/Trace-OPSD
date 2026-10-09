@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "name": "verl",
+  "license": "Apache-2.0",
+  "upstream": {
+    "repository": "https://github.com/verl-project/verl.git",
+    "tag": null,
+    "revision": "9c38b8bb1876a81273d76de3e79328b2dd2b7b32",
+    "git_tree": "741af7a71faf11b9e99ef74cf90a2c0e8b811652"
+  },
+  "snapshot": {
+    "algorithm": "trace_opsd-vendor-sha256-v1",
+    "file_count": 1009,
+    "sha256": "40be4d253c13a15114db70e16a20618b575cf57b51e198e07270e95a118d173c"
+  }
+}

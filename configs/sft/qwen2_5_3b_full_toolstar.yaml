@@ -1,0 +1,57 @@
+### model
+model_name_or_path: ../assets/models/Qwen2.5-3B-Instruct
+trust_remote_code: false
+flash_attn: fa2
+disable_gradient_checkpointing: false
+use_reentrant_gc: true
+enable_liger_kernel: false
+
+### method
+stage: sft
+do_train: true
+finetuning_type: full
+
+### dataset
+dataset: sft_math_tir
+# The launcher creates the registry in the external work directory.
+dataset_dir: ../assets/runs/sft/registry
+template: qwen
+cutoff_len: 15000
+max_samples: 1000000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+packing: false
+neat_packing: false
+train_on_prompt: false
+mask_history: false
+
+### output
+output_dir: ../assets/runs/checkpoints/sft/sft-qwen2.5-3b/trainer-output
+logging_steps: 10
+save_strategy: steps
+save_steps: 2000
+save_only_model: false
+restore_callback_states_from_checkpoint: true
+plot_loss: true
+overwrite_output_dir: false
+report_to: tensorboard
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4
+learning_rate: 7.0e-6
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+seed: 42
+data_seed: 42
+max_grad_norm: 1.0
+
+### eval
+do_eval: false
+eval_strategy: "no"
+load_best_model_at_end: false
+ignore_data_skip: false

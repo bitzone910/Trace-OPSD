@@ -1,0 +1,48 @@
+{
+  "schema_version": "toolelite.assets.v1",
+  "files": [
+    {
+      "path": "datasets/numinamath/asset-name-migration.json",
+      "bytes": 816,
+      "sha256": "e12fcc9302a66e3c17fcf6a819161106e12234730a8c8f6768ca1ee61607ee6f",
+      "original_path": "ToolElite/data/numinamath/asset-name-migration.json",
+      "verified_hub_sources": [],
+      "publication_status": "local_preserved"
+    },
+    {
+      "path": "datasets/numinamath/problem_difficulty_with_hindsight.before_sft_overlap_filter.parquet",
+      "bytes": 24406575,
+      "sha256": "0c20841b52d84f9afd31add6c74a3af10db630987461b44bc88e327b6be69e87",
+      "original_path": "ToolElite/data/numinamath/problem_difficulty_with_hindsight.before_sft_overlap_filter.parquet",
+      "verified_hub_sources": [],
+      "publication_status": "local_preserved"
+    },
+    {
+      "path": "datasets/numinamath/problem_difficulty_with_hindsight.removed_sft_overlap.parquet",
+      "bytes": 4778215,
+      "sha256": "b6b79941e424a3d78cc85ad2f3a2f8b73262c6fbe34d92c3348454ddb3053705",
+      "original_path": "ToolElite/data/numinamath/problem_difficulty_with_hindsight.removed_sft_overlap.parquet",
+      "verified_hub_sources": [],
+      "publication_status": "local_preserved"
+    },
+    {
+      "path": "datasets/numinamath/problem_difficulty_with_hindsight.sft_overlap_filter_report.json",
+      "bytes": 1538,
+      "sha256": "796b6dec808c00c83ca979a09db297e33a28ccc73de025b4d1c807ca0e575f3b",
+      "original_path": "ToolElite/data/numinamath/problem_difficulty_with_hindsight.sft_overlap_filter_report.json",
+      "verified_hub_sources": [],
+      "publication_status": "local_preserved"
+    },
+    {
+      "path": "wheels/flash_attn-2.8.1+cu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl",
+      "bytes": 126136659,
+      "sha256": "15db5bb6524dcbf292c3c116aa4c2fa823b80abff0eb5bc58454107bca1ba0c2",
+      "original_path": "ToolElite/wheels/flash_attn-2.8.1+cu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl",
+      "verified_hub_sources": [],
+      "publication_status": "local_preserved"
+    }
+  ],
+  "runtime_root": "runs",
+  "unpublished_assets": "Preserved locally; no upload authorized in this cleanup.",
+  "local_cleanup_receipt": "records/assets/deletions/2026-10-09-backed-assets-and-caches.json"
+}

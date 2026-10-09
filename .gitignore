@@ -2,17 +2,59 @@ __pycache__/
 *.py[cod]
 .venv/
 .mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+tmp/
 
 # Generated indexes and local model/data caches.
-general_search_database/index/*
-!general_search_database/index/.gitkeep
-theorem_search_database/index/*
-!theorem_search_database/index/.gitkeep
+data/general_search/index/*
+!data/general_search/index/.gitkeep
 .cache/
 huggingface_cache/
+models/Qwen2.5-7B-Instruct/
+models/Qwen2.5-3B-Instruct/
+
+# Rollout runtime state and generated datasets.
+.runtime/
+artifacts/environment_snapshots/
+outputs/
+rollout_outputs/
+data/rollouts/
 
 # Keep the small examples, but not the full corpora.
-general_search_database/corpus/*.jsonl
-!general_search_database/corpus/sample_corpus.jsonl
-theorem_search_database/corpus/*.jsonl
-!theorem_search_database/corpus/sample_corpus.jsonl
+data/general_search/corpus/*.jsonl
+!data/general_search/corpus/sample_corpus.jsonl
+
+data/numinamath/*.parquet
+
+# Generated SFT trajectories and local training artifacts.
+data/sft/train.jsonl
+data/sft/validation.jsonl
+data/sft/manifest.json
+
+# Prompt-only GRPO data and project-local checkpoints/exports.
+data/grpo/*.parquet
+data/grpo/manifest.json
+checkpoints/
+
+# Pinned external evaluation datasets are reproducible from their manifest.
+# Small sealed evaluation snapshots are part of the source distribution.
+
+# All models, wheels, full training corpora and generated records live outside.
+/assets/
+models/
+wheels/
+analysis/
+runs/
+logs/
+data/rollouts-pilot*/
+data/evaluation_sft_selection*/
+*.tar.gz
+*.whl
+records/
+configs/evaluation/*.local.yaml

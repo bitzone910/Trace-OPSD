@@ -1,0 +1,13 @@
+# Copy this template outside the source tree and replace every placeholder.
+# Paths must point to complete HF directories, never training DCP checkpoints.
+# Relative paths resolve below --assets-root; absolute paths are also supported.
+schema: trace_opsd.evaluation.models.v1
+baseline: <baseline-name>
+models:
+  - name: <baseline-name>
+    path: models/<baseline-HF-directory>
+  - name: <trained-model-name>
+    path: runs/exports/<trained-HF-directory>
+    # Optional exact-source checks for a TRACE export:
+    # expected_step: 400
+    # expected_run: your-trace-run

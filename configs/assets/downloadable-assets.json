@@ -1,0 +1,258 @@
+{
+  "schema_version": "toolelite.assets.downloadable.v1",
+  "cleanup_date": "2026-10-09",
+  "files": [
+    {
+      "path": "datasets/sft/sft_math_tir.json",
+      "bytes": 107216855,
+      "sha256": "9c6e537a64c43df2a2e950bcad7b9e82546b9b4472cd2cafbc5e4814772ad3ac",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/sft_math_tir",
+          "repo_type": "dataset",
+          "revision": "11b98e9d1e442026768931aae1dd7b2a24fedbc5",
+          "path": "sft_math_tir.json"
+        }
+      ]
+    },
+    {
+      "path": "datasets/numinamath/rl_trace_opsd.parquet",
+      "bytes": 19636048,
+      "sha256": "20a49e75f08e7ad0887839b69bcb84678038205682db8cd19c2b0f053c7589d7",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/rl_trace_opsd",
+          "repo_type": "dataset",
+          "revision": "dfcaaf807f042f91cabd7f2d70eca7b72b9b0223",
+          "path": "rl_trace_opsd.parquet"
+        }
+      ]
+    },
+    {
+      "path": "datasets/grpo/manifest.json",
+      "bytes": 770,
+      "sha256": "02a68b4f802aca336705cae233eeb1669400ae2b84d255bce65b5dc3ef754bea",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/rl_trace_opsd",
+          "repo_type": "dataset",
+          "revision": "dfcaaf807f042f91cabd7f2d70eca7b72b9b0223",
+          "path": "grpo/manifest.json"
+        }
+      ]
+    },
+    {
+      "path": "datasets/grpo/train.parquet",
+      "bytes": 9071923,
+      "sha256": "93a8c2b3bb7a348974d696fcd4ce462d6212ad9d04921d3bdd1ccb58b283a153",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/rl_trace_opsd",
+          "repo_type": "dataset",
+          "revision": "dfcaaf807f042f91cabd7f2d70eca7b72b9b0223",
+          "path": "grpo/train.parquet"
+        }
+      ]
+    },
+    {
+      "path": "datasets/grpo/validation.parquet",
+      "bytes": 128606,
+      "sha256": "ca7c12b01aa6571648134ab3a528b8fa0a63c184b4e879d63d131dd1f0059007",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/rl_trace_opsd",
+          "repo_type": "dataset",
+          "revision": "dfcaaf807f042f91cabd7f2d70eca7b72b9b0223",
+          "path": "grpo/validation.parquet"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/.gitattributes",
+      "bytes": 1477,
+      "sha256": "db7c0371f46f0840b8f25794c1e3321c9b5820a8cb6ba9694a46fc64b8fae5a6",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": ".gitattributes"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/config.json",
+      "bytes": 650,
+      "sha256": "01cc39aa39538a8179aa131c8a16adc03b506c92009f091502e4eb0c702f5f78",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "config.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/model.safetensors",
+      "bytes": 437955512,
+      "sha256": "d0d559c47d5f71b1d280b13b62a2657f3e3bc70c0786f9ab91a36545e6a8f693",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "model.safetensors"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/modules.json",
+      "bytes": 387,
+      "sha256": "c6e29747481e8b5dd2b58401966aeac910de39092f90cda9a704b1545f902b04",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "modules.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/README.md",
+      "bytes": 67561,
+      "sha256": "127d92b493963c5e7f74fcad5190546e19e404e5ff5b5c0c606dbcda57ca530e",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "README.md"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/sentence_bert_config.json",
+      "bytes": 57,
+      "sha256": "948201d8329907aae938fa62f9ceeed53f5694dacc2b87b9f3b78b37ee986529",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "sentence_bert_config.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/special_tokens_map.json",
+      "bytes": 125,
+      "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "special_tokens_map.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/tokenizer.json",
+      "bytes": 711396,
+      "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "tokenizer.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/tokenizer_config.json",
+      "bytes": 314,
+      "sha256": "ae83fa6ca0333117ff12606020af925d648667ef70d92ff7f27d781ba0ca4544",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "tokenizer_config.json"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/vocab.txt",
+      "bytes": 231508,
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "vocab.txt"
+        }
+      ]
+    },
+    {
+      "path": "models/e5-base-v2/1_Pooling/config.json",
+      "bytes": 200,
+      "sha256": "f586ab6c734af7b8d14d898bfa7faa886f23b46f86dd1730514309893af13d75",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "intfloat/e5-base-v2",
+          "repo_type": "model",
+          "revision": "f52bf8ec8c7124536f0efb74aca902b2995e5bcd",
+          "path": "1_Pooling/config.json"
+        }
+      ]
+    },
+    {
+      "path": "retrieval/general_search/corpus/search_r1_corpus.jsonl",
+      "bytes": 443937190,
+      "sha256": "741affc0363d4bad7e8871559dd6f849d5b19fd73a99e0124c100974c64255a7",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/wiki_math",
+          "repo_type": "dataset",
+          "revision": "bf033451c01191bf056c80a7592621423a65628c",
+          "path": "search_r1_corpus.jsonl"
+        }
+      ]
+    },
+    {
+      "path": "retrieval/general_search/index/e5_Flat.index",
+      "bytes": 1760289837,
+      "sha256": "09bf053b50922ad283620b4fdf84b4ab37e824a7cfd7cfb61e310c8452d7afb0",
+      "local_presence": "removed_by_user",
+      "verified_hub_sources": [
+        {
+          "repo_id": "BitZone910/wiki_math",
+          "repo_type": "dataset",
+          "revision": "157dd03b9245158741b066ee00832759261e663c",
+          "path": "index/e5_Flat.index"
+        }
+      ]
+    }
+  ]
+}

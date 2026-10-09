@@ -1,0 +1,14 @@
+# All TRACE training uses current_policy_solution_hindsight.turn_mean.v4.
+# Average raw gaps over the full assistant turn, then tanh/clamp and broadcast
+# one weight to its generated tokens. Observations and padding are excluded.
+# Aggregation is recorded as turn_mean in run metadata; no legacy training switch.
+enabled: true
+# Python/Search turns share this coefficient; final turns use the smaller one.
+credit_scale: 0.5
+final_credit_scale: 0.25
+evidence_scale: 1.0
+score_chunk_size: 64
+max_view_length: null
+# Optional trusted Python error penalty is applied after turn-mean OPSD shaping.
+python_error_penalty_enabled: true
+python_error_penalty_coef: 0.25

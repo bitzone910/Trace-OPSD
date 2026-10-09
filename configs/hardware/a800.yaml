@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "name": "a800",
+  "display_name": "NVIDIA A800",
+  "workload": "full",
+  "vendored_frameworks": ["verl", "llamafactory"],
+  "gpu": {
+    "name_patterns": ["A800"],
+    "compute_capability": [8, 0],
+    "cache_arch": "sm80",
+    "torch_cuda_arch_list": "8.0",
+    "minimum_driver": "570.124.06",
+    "final_gpu_count": 4,
+    "distributed_gpu_counts": [1, 2, 4, 8]
+  },
+  "runtime_config": "configs/runtime/a800.yaml",
+  "dependency_input": "requirements/trace_opsd.in",
+  "dependency_lock": "requirements/locks/a800-cu128.txt",
+  "flash_attention": {
+    "version": "2.8.1",
+    "filename": "flash_attn-2.8.1+cu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl",
+    "url": "https://github.com/Dao-AILab/flash-attention/releases/download/v2.8.1/flash_attn-2.8.1%2Bcu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl",
+    "sha256": "15db5bb6524dcbf292c3c116aa4c2fa823b80abff0eb5bc58454107bca1ba0c2",
+    "size_bytes": 126136659
+  },
+  "inference": {
+    "gpu_memory_utilization": 0.60,
+    "vllm_attention_backend": "FLASH_ATTN",
+    "xformers_kernel_policy": "enabled"
+  }
+}

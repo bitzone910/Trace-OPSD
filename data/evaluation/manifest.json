@@ -1,0 +1,68 @@
+{
+  "benchmarks": {
+    "aime24": {
+      "count": 30,
+      "normalized_file": "aime24.jsonl",
+      "normalized_sha256": "c9d40558bfcadcab3e00ea08fdf950f01fecec153982c374601a3698477b1e50",
+      "repo": "HuggingFaceH4/aime_2024",
+      "revision": "2fe88a2f1091d5048c0f36abc874fb997b3dd99a",
+      "source_file": "data/train-00000-of-00001.parquet",
+      "source_sha256": "26139847601a5037c237d5928b195e7260ca8074cf4f264b794af42847f79ccf",
+      "training_overlap_count": 0,
+      "training_overlap_ids": []
+    },
+    "aime25": {
+      "count": 30,
+      "normalized_file": "aime25.jsonl",
+      "normalized_sha256": "cc6daaa2bcafac8f0d4572613f848ad2561fbb24dafa575072dd75ea978590b1",
+      "repo": "MathArena/aime_2025",
+      "revision": "c94da77eb22bbd6439e62a323bec18493a421302",
+      "source_file": "data/train-00000-of-00001.parquet",
+      "source_sha256": "9f9066ff48ad2e31f9bf1b1ac6d5e80693195f987985f2859f89dd25ffa51c2d",
+      "training_overlap_count": 0,
+      "training_overlap_ids": []
+    },
+    "aime26": {
+      "count": 30,
+      "normalized_file": "aime26.jsonl",
+      "normalized_sha256": "a2d174c5b82df0b415620155a0e958a4404ab32adfe36b730150360d52921fdc",
+      "repo": "MathArena/aime_2026",
+      "revision": "d2de22f3c656b4f56cf8981212186377d1e23bc3",
+      "source_file": "data/train-00000-of-00001.parquet",
+      "source_sha256": "d91db799651b4cc1f0734f52792a695c9cc60dac342524b3d8e5b2ff31c3e957",
+      "training_overlap_count": 1,
+      "training_overlap_ids": [
+        "aime26-0001"
+      ]
+    },
+    "gsm8k": {
+      "count": 1319,
+      "normalized_file": "gsm8k.jsonl",
+      "normalized_sha256": "b49fa8e43deb64a19a6eaa30c882ecd613ff44efd293e3e4de0a6cdd8ce0e2a2",
+      "repo": "openai/gsm8k",
+      "revision": "740312add88f781978c0658806c59bc2815b9866",
+      "source_file": "main/test-00000-of-00001.parquet",
+      "source_sha256": "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59",
+      "training_overlap_count": 0,
+      "training_overlap_ids": []
+    },
+    "math500": {
+      "count": 500,
+      "normalized_file": "math500.jsonl",
+      "normalized_sha256": "5fb2fd5f6f4aa3a375901d567749294b45a9e3a1073f6d3fb9559fecc07d1fc5",
+      "repo": "HuggingFaceH4/MATH-500",
+      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+      "source_file": "test.jsonl",
+      "source_sha256": "35dc41080a3680858b27fa7e0533d2d547825316fc5dafe5d316f4ccc5a06132",
+      "training_overlap_count": 0,
+      "training_overlap_ids": []
+    }
+  },
+  "schema": "toolelite.evaluation.dataset.v1",
+  "training_sources": [
+    {
+      "path": "C:\\Users\\lenovo\\Desktop\\ToolElite\\ToolElite\\data\\numinamath\\problem_difficulty_with_hindsight.parquet",
+      "sha256": "0c20841b52d84f9afd31add6c74a3af10db630987461b44bc88e327b6be69e87"
+    }
+  ]
+}

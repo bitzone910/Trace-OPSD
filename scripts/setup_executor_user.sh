@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-executor_user="${1:-toolelite-exec}"
+executor_user="${1:-trace-opsd-exec}"
 python_bin="${2:-${CONDA_PREFIX:-}/bin/python}"
 
 if [[ "$(id -u)" -ne 0 ]]; then
