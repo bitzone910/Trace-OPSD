@@ -1,32 +1,38 @@
-# 外部资产与恢复
+# External Assets and Recovery
 
-默认资产根为仓库同级 `../assets`，可用 `--assets-root` 或 `TRACE_OPSD_ASSET_ROOT`指定。
-运行根默认 `<assets>/runs`，可用 `--work-root` 或 `TRACE_OPSD_WORK_ROOT`指定。
-输入文件内容保持不变，原始GRPO划分manifest不因迁移改写。
+The default asset root is the sibling directory `../assets`. Override it with
+`--assets-root` or `TRACE_OPSD_ASSET_ROOT`. Runtime outputs default to
+`<assets>/runs`; override them with `--work-root` or `TRACE_OPSD_WORK_ROOT`.
+Input contents are preserved, including the original GRPO split manifest.
 
-| 相对资产路径 | 来源 |
+| Relative asset path | Source |
 |---|---|
-| `models/Qwen2.5-3B-Instruct` | Qwen官方完整模型，本地准备 |
-| `models/e5-base-v2` | intfloat/e5-base-v2；已核对固定revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd` |
-| `datasets/sft/sft_math_tir.json` | BitZone910/sft_math_tir，30,438条 |
-| `datasets/numinamath/rl_trace_opsd.parquet` | BitZone910/rl_trace_opsd，20,161条 |
-| `datasets/grpo/{train,validation}.parquet`和`manifest.json` | 同上，19,905训练+256验证 |
-| `retrieval/general_search/corpus/search_r1_corpus.jsonl` | BitZone910/wiki_math，Search-R1 corpus格式 |
-| `retrieval/general_search/index/e5_Flat.index` | BitZone910/wiki_math 的 `index/e5_Flat.index`，固定revision `157dd03b9245158741b066ee00832759261e663c` |
-| `wheels/flash_attn-2.8.1+cu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl` | 环境锁定artifact，SHA256见硬件配置与清单 |
+| `models/Qwen2.5-3B-Instruct` | Complete official Qwen model, prepared locally |
+| `models/e5-base-v2` | intfloat/e5-base-v2; verified revision `f52bf8ec8c7124536f0efb74aca902b2995e5bcd` |
+| `datasets/sft/sft_math_tir.json` | BitZone910/sft_math_tir; 30,438 records |
+| `datasets/numinamath/rl_trace_opsd.parquet` | BitZone910/rl_trace_opsd; 20,161 records |
+| `datasets/grpo/{train,validation}.parquet` and `manifest.json` | Same repository; 19,905 training and 256 validation records |
+| `retrieval/general_search/corpus/search_r1_corpus.jsonl` | BitZone910/wiki_math; Search-R1 corpus format |
+| `retrieval/general_search/index/e5_Flat.index` | `index/e5_Flat.index` in BitZone910/wiki_math; pinned revision `157dd03b9245158741b066ee00832759261e663c` |
+| `wheels/flash_attn-2.8.1+cu12torch2.8cxx11abiFALSE-cp312-cp312-linux_x86_64.whl` | Pinned environment artifact; SHA256 in the hardware profile and manifest |
 
-`configs/assets/manifest.json`记录当前资产路径、大小、SHA256与已验证的HF来源/固定commit。
-`local_preserved`表示本地保留，不表示已上传。当前2.8.1 wheel及RL去重记录仍保留在assets；
-NuminaMath清洗/质检、早期pilot与旧SFT筛选记录已按用户要求删除。
-正式入口只引用当前资源。环境安装不会自动下载大型模型、数据或索引。
+`configs/assets/manifest.json` records asset paths, sizes, SHA256 hashes, and
+verified HF sources/pinned commits. `local_preserved` means retained locally, not
+uploaded. The 2.8.1 wheel and RL overlap provenance records remain in assets.
+NuminaMath cleaning/quality-control records, early pilot trajectories, and old SFT
+selection records were deleted at the user's request. Public launchers reference
+only current resources. Setup does not download large models, data, or indices.
 
-2026-10-09按用户要求删除了本机已发布的SFT/RL数据与GRPO划分、E5副本、
-corpus、FAISS索引，以及未使用的FlashAttention 2.8.3 wheel。
-当前 `manifest.json` 只记录仍在本地的5个资产：RL去重来源记录和2.8.1 wheel。
-`configs/assets/downloadable-assets.json` 保留18个可从HF恢复的正式文件的路径、
-SHA256和固定commit；上表仍是运行所需输入，运行前需要重新下载或指定完整的外部资产目录。
+On 2026-10-09, published local SFT/RL data and GRPO splits, the E5 copy, corpus,
+FAISS index, and unused FlashAttention 2.8.3 wheel were removed as requested.
+The current `manifest.json` describes the five remaining local assets: RL overlap
+provenance records and the 2.8.1 wheel. `configs/assets/downloadable-assets.json`
+retains paths, SHA256 hashes, and pinned commits for 18 recoverable HF files.
+Restore the required inputs above, or provide a complete external asset directory,
+before running the workflow.
 
-例如按固定版本恢复已发布训练数据（先安装/登录本地hf CLI，公开下载无需token）：
+For example, restore the published training data at pinned revisions using the
+local HF CLI. Public downloads do not require a token.
 
 ```bash
 hf download BitZone910/sft_math_tir --repo-type dataset \
@@ -38,7 +44,9 @@ cp ../assets/datasets/rl-download/rl_trace_opsd.parquet ../assets/datasets/numin
 cp ../assets/datasets/rl-download/grpo/* ../assets/datasets/grpo/
 ```
 
-按源仓库许可证使用这些资产；Qwen衍生模型许可和Tool-Star来源说明保留在
-`docs/hf-assets/licenses/`及相应HF模型/数据卡。E5不是Trace-OPSD自训模型。
-FAISS可按[General Search说明](general-search.md)下载已发布的固定版本；也可从匹配的
-E5和corpus显式重建。不要替换为其它数学库索引，也不要覆盖现有文件。
+Follow each source repository's license. Qwen-derived model licenses and Tool-Star
+attribution are retained in `docs/hf-assets/licenses/` and the corresponding HF
+model/dataset cards. E5 is not a model trained by Trace-OPSD. Download the pinned
+FAISS index following [General Search](general-search.md), or explicitly rebuild
+it from the matching E5 model and corpus. Do not substitute another mathematical
+database's index or overwrite existing files.

@@ -1,10 +1,15 @@
-# TRACE学习率控制
+# TRACE Learning-Rate Control
 
-默认是峰值5e-7、50步warmup与cosine调度，最小学习率倍率0.1。
-一般阶段续训会恢复优化器与调度器，不重启warmup。
+The default schedule has a peak learning rate of 5e-7, 50 warmup steps, and cosine
+decay with a minimum ratio of 0.1. Normal stage continuation restores the optimizer
+and scheduler without restarting warmup.
 
-可选 `+trainer.trace_lr_scale=<倍率>` 调整恢复后的调度倍率；
-可选 `+trainer.trace_learning_rate=<数值>` 改为恒定实际学习率。二者互斥。
-恒定模式记录在checkpoint，后续恢复继承；各参数组保留基础学习率比例。
-这些选项不改变信用机制，阶段变更需满足run的既有兼容检查。
-调参前分析actor/lr、KL、熵、梯度与验证指标。本次仓库整理不改变训练超参数。
+Use `+trainer.trace_lr_scale=<factor>` to scale the restored schedule, or
+`+trainer.trace_learning_rate=<value>` to set a constant effective learning rate.
+These options are mutually exclusive. Constant mode is recorded in checkpoints
+and inherited on recovery. Relative base learning rates across parameter groups
+are preserved.
+
+These options do not change the credit mechanism. Stage changes must satisfy
+existing run-compatibility checks. Review `actor/lr`, KL, entropy, gradients, and
+validation metrics before tuning. Repository cleanup did not alter hyperparameters.

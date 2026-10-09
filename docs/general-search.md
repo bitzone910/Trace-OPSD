@@ -1,12 +1,14 @@
 # General Search
 
-General Search使用Search-R1格式corpus：每行包含 `id`、`contents`；E5对query与
-contents编码，通过FAISS inner-product检索。默认CPU检索，服务用于TRACE及evaluation。
-保持corpus、E5模型与FAISS索引的行顺序和版本一致。
+General Search uses a Search-R1-format corpus with `id` and `contents` on each line.
+E5 encodes queries and contents; FAISS performs inner-product retrieval. Retrieval
+defaults to the CPU and serves TRACE and evaluation. Keep the corpus row order,
+E5 model, and FAISS index versions consistent.
 
-完整索引已发布在 `BitZone910/wiki_math`，共573,011个768维向量，类型IndexFlatIP。
-SHA256为 `09bf053b50922ad283620b4fdf84b4ab37e824a7cfd7cfb61e310c8452d7afb0`。
-下载固定版本索引及对应corpus（在仓库根目录执行）：
+The complete index is published in `BitZone910/wiki_math`: 573,011 vectors of
+dimension 768, stored as IndexFlatIP. Its SHA256 is
+`09bf053b50922ad283620b4fdf84b4ab37e824a7cfd7cfb61e310c8452d7afb0`.
+Download the pinned index and matching corpus from the repository root:
 
 ```bash
 hf download BitZone910/wiki_math index/e5_Flat.index index/index-metadata.json \
@@ -17,11 +19,13 @@ hf download BitZone910/wiki_math search_r1_corpus.jsonl \
   --local-dir ../assets/retrieval/general_search/corpus
 ```
 
-编码器固定为 `intfloat/e5-base-v2` 的 `f52bf8ec8c7124536f0efb74aca902b2995e5bcd`。
-核验文件哈希和corpus行顺序后再启动检索；具体元数据在下载的 `index/index-metadata.json`。
-上传的是已有索引，未重新生成embedding；历史构建的max_length和device没有独立记录。
+The encoder is pinned to `intfloat/e5-base-v2` revision
+`f52bf8ec8c7124536f0efb74aca902b2995e5bcd`. Check file hashes and corpus ordering
+before retrieval. Metadata resides in the downloaded `index/index-metadata.json`.
+The published file is the existing index; embeddings were not regenerated.
+The historical build's `max_length` and device were not independently recorded.
 
-需要重新构建时显式执行，不覆盖已有索引：
+Rebuild only explicitly, without overwriting an existing index:
 
 ```bash
 python -m trace_opsd.retrieval.general.build_index \
@@ -31,7 +35,8 @@ python -m trace_opsd.retrieval.general.build_index \
   --faiss_type Flat --device cpu --no-faiss_gpu
 ```
 
-完整corpus与模型已移出源码。小型示例保留在
-`data/general_search/corpus/sample_corpus.jsonl`，可以用于接口检查。
-发布时已核验索引与本地内容一致。2026-10-09按用户要求删除本机索引、corpus和
-E5副本；本机运行检索前需按固定版本恢复这些输入。
+The complete corpus and model are external assets. A small interface-check sample
+remains in `data/general_search/corpus/sample_corpus.jsonl`. The index was verified
+against local content before publication. On 2026-10-09, the local index, corpus,
+and E5 copy were removed as requested. Restore these pinned inputs before running
+retrieval locally.

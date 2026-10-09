@@ -1,31 +1,37 @@
-# 四张A800的SFT
+# SFT on Four A800 GPUs
 
-从已准备的完整Qwen2.5-3B-Instruct HF目录开始，读取 `instruction/input/output`
-Alpaca数据。每条完整output（含多个推理、工具动作与result）保持原始监督语义；
-不隐式拆成ShareGPT轮次，不把工具反馈从output中删去。
+Start from a prepared, complete Qwen2.5-3B-Instruct HF directory and read Alpaca
+records with `instruction/input/output` fields. Preserve supervision over each
+complete `output`, including reasoning, tool actions, and results. Records are not
+implicitly split into ShareGPT turns, and tool feedback is not removed.
 
-默认使用全部30,438条，不划分验证集，不按eval_loss选优。
-LLaMA-Factory模板为qwen，cutoff_len=15000，使用其原生截断规则，预检记录截断数量。
-cutoff包含输入与完整输出；静态SFT没有在线工具调用或rollout生成预算。
+All 30,438 records are used for training by default. There is no validation split
+or selection by `eval_loss`. The LLaMA-Factory template is `qwen`, with
+`cutoff_len=15000` and its native truncation rules. Preflight records truncation
+counts. The cutoff covers the input and full output; static SFT has no online
+tool-call or rollout generation budget.
 
-| 设置 | 默认 |
+| Setting | Default |
 |---|---:|
-| A800卡数 / 后端 / 精度 | 4 / FSDP1 / BF16 |
-| 每卡batch / 梯度累积 / 有效batch | 1 / 4 / 16 |
-| 学习率 / epoch | 7e-6 / 3 |
-| 调度 / warmup_ratio | cosine / 0.1 |
+| A800 GPUs / backend / precision | 4 / FSDP1 / BF16 |
+| Batch per GPU / gradient accumulation / effective batch | 1 / 4 / 16 |
+| Learning rate / epochs | 7e-6 / 3 |
+| Scheduler / warmup_ratio | cosine / 0.1 |
 | logging_steps / save_steps | 10 / 2000 |
 
-这些数值参考桌面Tool-Star实际训练YAML：原8卡batch1累积2，在4卡下改累积4以保持
-有效batch16。继续复用Trace-OPSD既有FSDP1和checkpoint管理，不引入第二套ZeRO后端。
+These values follow the actual Tool-Star training YAML inspected locally.
+Its eight-GPU batch-1, accumulation-2 setup becomes accumulation 4 on four GPUs,
+preserving an effective batch of 16. Trace-OPSD retains its existing FSDP1 backend
+and checkpoint management rather than adding a second ZeRO backend.
 
 ```bash
 bash scripts/run_sft.sh validate --assets-root ../assets
 bash scripts/run_sft.sh train --assets-root ../assets --run-name sft-math
 ```
 
-默认模型 `../assets/models/Qwen2.5-3B-Instruct`，数据
-`../assets/datasets/sft/sft_math_tir.json`，可显式指定 `--model-path`、`--dataset-file`。
-输出位于 `<work>/checkpoints/sft/<run>`，保留最近两个checkpoint。
-训练结束自动在独立进程中导出完整HF模型到 `<work>/exports/sft/<run>/final`。
-恢复与单独导出参数见入口 `--help`。预检仍校验数据、模型、tokenizer与环境。
+The default model is `../assets/models/Qwen2.5-3B-Instruct` and the dataset is
+`../assets/datasets/sft/sft_math_tir.json`. Override them with `--model-path` and
+`--dataset-file`. Checkpoints reside in `<work>/checkpoints/sft/<run>`; the latest
+two are retained. On completion, a separate process exports a complete HF model to
+`<work>/exports/sft/<run>/final`. See `--help` for recovery and standalone export.
+Preflight continues to verify data, model, tokenizer, and environment.

@@ -1,29 +1,34 @@
-# 验收
+# Validation
 
-本地CPU回归覆盖turn均值公式、PPO梯度方向、Python错误处罚、工具协议、课程采样、
-checkpoint恢复与保留、SFT原始数据/截断以及贪心和多采样评测。
+Local CPU regressions cover the turn-mean formula, PPO gradient direction, Python
+error penalties, tool protocol, curriculum sampling, checkpoint recovery/retention,
+SFT input/truncation, and greedy/multi-sample evaluation.
 
-此前仓库整理的本地验收共收集1,015项：分批复核覆盖1,014项通过，1项因Windows
-Torch构建不支持Gloo传输而跳过。Ruff、四入口帮助、全部Bash语法及两套完整vendor
-摘要校验通过。环境执行用户测试使用命令替身，没有实际安装Linux包或创建账户。
+Earlier cleanup validation collected 1,015 cases: batch checks covered 1,014 passes
+and one skip because the Windows Torch build lacked Gloo transport support. Ruff,
+help for the four launchers, all Bash syntax checks, and both complete vendor
+digests passed. Executor-user tests used command substitutes; they did not install
+Linux packages or create actual accounts.
 
-改名后的验收为684项CPU回归及14项新增兼容测试通过，1项Windows Gloo测试跳过。
-测试工作副本和完整记录位于本地外层 `records/project-renaming/2026-10-09/validation/`；
-当前公开源码未包含根目录tests，不能直接运行 `pytest tests`。
-具体迁移与验证范围见[项目改名说明](project-renaming.md)。
+Rename validation passed 684 CPU regression cases and 14 new compatibility cases,
+with one Windows Gloo case skipped. Working test copies and full records reside
+locally in the outer `records/project-renaming/2026-10-09/validation/` directory.
+Public source does not contain a root `tests` directory, so `pytest tests` is not
+available there. See [Naming and migration](project-renaming.md) for scope.
 
 ```bash
 python scripts/verify_vendored_framework.py frameworks/verl --expected-name verl
 python scripts/verify_vendored_framework.py frameworks/LlamaFactory --expected-name LlamaFactory
 ```
 
-具体工具参数以 `--help` 为准。四个公开入口的 `--help` 不需要先启动GPU服务。
-正式A800运行前检查资产，再进行少量数据的流程验证，例如：
+Use `--help` for current arguments. The four public launchers can display help
+without starting GPU services. Before a formal A800 run, verify assets and perform
+a small process check:
 
 ```bash
 export ASSETS=/root/autodl-tmp/assets
 export WORK="$ASSETS/runs"
-# 已配置环境后复核四卡CUDA、FlashAttention及NCCL
+# Recheck four-GPU CUDA, FlashAttention, and NCCL after environment setup.
 bash scripts/setup_env.sh --validate-only --gpu-count 4 \
   --assets-root "$ASSETS" --work-root "$WORK"
 bash scripts/run_sft.sh validate --assets-root "$ASSETS" --work-root "$WORK"
@@ -37,6 +42,8 @@ bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --limit-per-benchmark 2 --output-root "$WORK/evaluation/process-check"
 ```
 
-小样本只检查加载、生成、Python与搜索执行、保存、判分及恢复，不设准确率门槛，
-不得与完整正式结果混合。本轮没有在本机运行A800训练/推理；GPU kernel、NCCL、
-SFT实际更新与TRACE实际更新需在目标设备验收，不以CPU替身测试宣称通过。
+Small checks cover loading, generation, Python/search execution, saving, scoring,
+and recovery. They have no accuracy threshold and must remain separate from formal
+complete results. A800 training/inference was not run locally during cleanup.
+GPU kernels, NCCL, actual SFT updates, and actual TRACE updates must be validated
+on the target device; CPU substitutes do not establish those checks.

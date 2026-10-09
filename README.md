@@ -1,105 +1,123 @@
 # Trace-OPSD
 
-面向多轮数学推理的双工具后训练项目：**SFT → TRACE-OPSD → evaluation**。
-默认使用 4 张 A800 训练、单张 A800 评测；Python 与 General Search 在 CPU 上运行。
+Dual-tool post-training for multi-turn mathematical reasoning: **SFT → TRACE-OPSD → evaluation**.
+The default setup uses four A800 GPUs for training and one A800 for evaluation.
+Python execution and General Search run on the CPU.
 
-模型生成 `<python>...</python>` 或 `<search>...</search>` 调用工具，最终答案采用
-`<answer>...\boxed{...}</answer>`。奖励按最终数学答案判定，工具观察不参与策略 loss。
+The model invokes tools with `<python>...</python>` or `<search>...</search>` and
+returns a final answer as `<answer>...\boxed{...}</answer>`. Rewards depend on the
+final mathematical answer. Tool observations are excluded from the policy loss.
 
-## 资源与运行目录
+## Assets and runtime directories
 
 ```text
 Trace-OPSD-workspace/
-├── Trace-OPSD/                 # 本仓库
+├── Trace-OPSD/                 # This source repository
 ├── assets/
-│   ├── models/                # Qwen2.5-3B-Instruct、e5-base-v2等完整HF目录
+│   ├── models/                # Complete HF models, including Qwen2.5-3B-Instruct and e5-base-v2
 │   ├── datasets/sft/sft_math_tir.json
 │   ├── datasets/numinamath/rl_trace_opsd.parquet
-│   ├── datasets/grpo/         # 固定train/validation/manifest
+│   ├── datasets/grpo/         # Fixed train/validation splits and manifest
 │   ├── retrieval/general_search/{corpus,index}/
-│   ├── wheels/               # A800锁定的FlashAttention wheel
-│   └── runs/                 # 默认checkpoint、导出模型、指标、评测及缓存
-└── records/                  # 本地保留的历史实验记录，不进入源码仓库
+│   ├── wheels/               # Pinned FlashAttention wheel for A800
+│   └── runs/                 # Default location for checkpoints, exports, metrics, evaluation, and caches
+└── records/                  # Local historical experiment records, outside the source repository
 ```
 
-所有公开入口支持 `--assets-root`、`--work-root`，也可设置
-`TRACE_OPSD_ASSET_ROOT`、`TRACE_OPSD_WORK_ROOT`。默认资源为仓库同级 `../assets`，
-默认运行目录为该资源目录下的 `runs`。模型和大型数据不会由环境安装自动下载。
-资源来源、固定版本和校验方法见 [资产说明](docs/assets.md)。
+All public launchers accept `--assets-root` and `--work-root`. These paths can also
+be set through `TRACE_OPSD_ASSET_ROOT` and `TRACE_OPSD_WORK_ROOT`. Assets default to
+the sibling directory `../assets`; runtime outputs default to its `runs` directory.
+Environment setup does not download large models or datasets. See
+[External assets](docs/assets.md) for sources, pinned revisions, and verification.
 
-## 四个入口
+## Four launchers
 
-以下示例在 Linux/AutoDL 仓库根目录执行。`ASSETS` 可换成你的实际资源目录。
+Run these examples from the repository root on Linux/AutoDL. Set `ASSETS` to your
+actual asset directory.
 
 ```bash
 export ASSETS=/root/autodl-tmp/assets
 export WORK="$ASSETS/runs"
 
-# 1. 配置完整A800环境和Python隔离执行用户
+# 1. Set up the A800 environment and an isolated Python executor user.
 bash scripts/setup_env.sh --assets-root "$ASSETS" --work-root "$WORK" --gpu-count 4
 
-# 2. 使用已有TIR数据做SFT，完成后自动导出完整HF模型
+# 2. Train on prepared TIR data and export a complete HF model on completion.
 bash scripts/run_sft.sh train --assets-root "$ASSETS" --work-root "$WORK" \
   --run-name sft-math --model-path "$ASSETS/models/Qwen2.5-3B-Instruct" \
   --dataset-file "$ASSETS/datasets/sft/sft_math_tir.json"
 
-# 3. 执行TRACE的第一阶段；16/16是示例配比，每阶段自行设定
+# 3. Run the first TRACE stage. The 16/16 difficulty mix is an example.
 bash scripts/run_trace_curriculum.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --run-name trace-math --model-path "$WORK/exports/sft/sft-math/final" \
   --after-step 0 --mid-per-step 16 --high-per-step 16 --resume none
 
-# 后续阶段使用同一run、上一阶段结束step和本阶段难度配比
+# For subsequent stages, use the same run, the previous stage's final step,
+# and the difficulty mix for the new stage:
 # --after-step 50 --mid-per-step 16 --high-per-step 16 --resume latest
 
-# 4. 先复制并填写模型清单，然后选择贪心、8采样或两者
+# 4. Copy and fill in a model list, then select greedy, sampling8, or both.
 mkdir -p "$WORK"
 cp configs/evaluation/models.example.yaml "$WORK/evaluation-models.yaml"
-# 编辑evaluation-models.yaml中的模型名称、完整HF路径和可选baseline
+# Edit model names, complete HF paths, and the optional baseline in this file.
 bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --models-file "$WORK/evaluation-models.yaml" --protocol all \
   --output-root "$WORK/evaluation/math-comparison"
 ```
 
-评测模型没有默认值，占位符未填写时预检会明确失败；不会猜测历史run或替换成latest。
-可用 `--protocol greedy` 或 `--protocol sampling8` 单独执行相应协议。
-各入口提供 `--help`；必要的资产、工具服务和checkpoint预检仍保留。
+Evaluation requires an explicit model list. Unfilled placeholders fail preflight;
+the launcher does not infer historical runs or substitute the latest checkpoint.
+Use `--protocol greedy` or `--protocol sampling8` to run either protocol separately.
+Every launcher provides `--help` and retains asset, tool-service, and checkpoint checks.
 
-## 默认训练与推理设置
+## Default training and inference settings
 
-| 项目 | SFT | TRACE / evaluation |
+| Setting | SFT | TRACE / evaluation |
 |---|---|---|
-| 精度 | BF16全参数训练 | BF16推理；TRACE全参数训练 |
-| token限制 | 完整训练序列截断15,000 | 上下文8192、总响应4096、每轮1024、观察512 |
-| 工具调用 | 读取已有工具轨迹，无在线生成预算 | 最多5次工具调用，连续2次无效动作终止 |
-| 数据/采样 | 30,438条Alpaca全部训练 | TRACE每step32个有效题组、每题8条轨迹 |
-| 优化 | 每卡batch1、累积4、lr7e-6、3epoch、cosine、warmup0.1 | lr5e-7、warmup50步、cosine最小倍率0.1、KL系数0.005 |
+| Precision | Full-parameter BF16 training | BF16 inference; full-parameter TRACE training |
+| Token budgets | Full training sequence truncated at 15,000 | Context 8192; total response 4096; generation per turn 1024; observation 512 |
+| Tool calls | Prepared tool trajectories; no online generation budget | At most 5 calls; stop after 2 consecutive invalid actions |
+| Data / sampling | All 30,438 Alpaca records used for training | TRACE: 32 accepted problem groups per step, 8 trajectories per problem |
+| Optimization | Batch 1 per GPU; accumulation 4; LR 7e-6; 3 epochs; cosine; warmup 0.1 | LR 5e-7; 50 warmup steps; cosine minimum ratio 0.1; KL coefficient 0.005 |
 
-SFT 沿用 Tool-Star 的15,000截断行为，报告截断数量，不拆开或删除原始output内工具反馈。
-TRACE 初始模型先做256题baseline，每50步保存、验证并打包完整阶段指标后退出，
-最后一个阶段止于总步数622。checkpoint保留最新两个完整版本及最佳版本。
+SFT follows Tool-Star's 15,000-token truncation behavior and reports truncation
+counts. It preserves tool feedback inside the original `output` without splitting
+the record. TRACE first evaluates the initial model on a fixed 256-question
+baseline. Every 50 steps, it saves a checkpoint, validates, packages the stage's
+metrics, and exits. The final stage ends at step 622. Retention keeps the two latest
+complete checkpoints and the best checkpoint.
 
-## 算法与评测
+## Algorithm and evaluation
 
-TRACE 当前版本为 `current_policy_solution_hindsight.turn_mean.v4`：对同一assistant turn
-中的原始teacher–student log-probability gap求均值，得到一个权重，广播到该turn的全部
-有效生成token。Python错误惩罚默认启用，系数0.25，在OPSD缩放之后执行。
+The current TRACE algorithm is `current_policy_solution_hindsight.turn_mean.v4`.
+It averages raw teacher–student log-probability gaps within each assistant turn,
+computes one credit weight, and broadcasts that weight to every valid generated
+token in the turn. Python error penalties are enabled by default with coefficient
+0.25 and are applied after OPSD scaling.
 
-正式评测快照覆盖 GSM8K、MATH500、AIME24/25/26，共1,909题。
-贪心协议报告Pass@1；8采样报告Pass@8、Avg@8、Majority@8和Pass@1/2/4诊断曲线，
-同时统计工具调用、执行错误、无答案、截断和生成失败。
-Avg@8是采样协议的平均正确率，不能与温度0的贪心Pass@1混称。
+The fixed evaluation snapshot covers GSM8K, MATH500, and AIME24/25/26, totaling
+1,909 questions. Greedy evaluation reports Pass@1. Eight-sample evaluation reports
+Pass@8, Avg@8, Majority@8, and diagnostic Pass@1/2/4 curves. Both retain tool calls,
+execution errors, missing answers, truncation, and generation failures.
+Avg@8 is accuracy under the sampling protocol; it is distinct from greedy Pass@1
+at temperature 0.
 
-历史训练及已发布step400模型使用当时的信用机制，其既有评测结果不能作为turn-mean v4的验证。
-旧checkpoint可以只读检查和导出HF权重，用作新run初始模型；新机制不迁移旧优化器状态。
+Historical training and the published step400 model used the credit mechanism
+active at that time. Their existing evaluation results do not validate turn-mean
+v4. Historical checkpoints support read-only inspection and HF export for use as
+initial weights in a new run; optimizer state is not migrated to the new mechanism.
 
-## 文档与验证
+## Documentation and validation
 
-- [SFT](docs/sft.md)、[TRACE训练](docs/trace-training.md)、[算法公式](docs/trace-opsd-method.md)
-- [Evaluation](docs/evaluation.md)、[8采样指标](docs/evaluation-sampling.md)
-- [A800环境](docs/hardware-profiles.md)、[General Search](docs/general-search.md)
-- [Python错误信用](docs/trace-python-error-credit.md)、[验收命令](docs/validation.md)
-- [项目改名与AutoDL迁移](docs/project-renaming.md)
+- [SFT](docs/sft.md), [TRACE training](docs/trace-training.md), [Algorithm](docs/trace-opsd-method.md)
+- [Evaluation](docs/evaluation.md), [Eight-sample metrics](docs/evaluation-sampling.md)
+- [A800 environment](docs/hardware-profiles.md), [General Search](docs/general-search.md)
+- [Python error credit](docs/trace-python-error-credit.md), [Validation](docs/validation.md)
+- [Project naming and AutoDL migration](docs/project-renaming.md)
 
-vendored verl 与 LLaMA-Factory 保留完整快照和原许可证，环境安装检查其内容摘要。
-其中上游示例属于第三方源码，不是Trace-OPSD的公开实验入口。来源见 `NOTICE`。
-CPU回归覆盖算法、工具协议、恢复和评测；本轮整理后的完整GPU流程尚未在本机执行。
+Complete vendored snapshots of verl and LLaMA-Factory retain their original
+licenses. Environment setup verifies their content digests. Upstream examples are
+third-party source, separate from Trace-OPSD's public experiment launchers. See
+`NOTICE` for attribution. CPU regression checks cover the algorithm, tool protocol,
+recovery, and evaluation. The full GPU workflow after repository cleanup has not
+been executed locally.

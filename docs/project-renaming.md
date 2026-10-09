@@ -1,80 +1,92 @@
-# Trace-OPSD 命名与迁移
+# Trace-OPSD Naming and Migration
 
-项目名称统一为 **Trace-OPSD**，Python 包为 `trace_opsd`，安装包和默认 Conda
-环境为 `trace-opsd`。本次仅改变工程命名及历史格式读取；算法、提示词、工具动作、
-训练参数、依赖版本和评测指标没有调整。
+The project is named **Trace-OPSD**, the Python package is `trace_opsd`, and the
+distribution/default Conda environment is `trace-opsd`. Renaming changed engineering
+identifiers and historical-format readers. It did not alter the algorithm, prompts,
+tool actions, training parameters, dependency versions, or evaluation metrics.
 
-## 当前本地目录
+## Local layout
 
 ```text
 C:/Users/lenovo/Desktop/ToolElite/
-├── Trace-OPSD/             # 原内层项目，待发布源码
-├── assets/                 # 保留的外部资产和运行目录
-├── records/                # 历史实验、改名备份和验证结果
-└── .trace-engineering-venv/ # 本地工程环境
+├── Trace-OPSD/             # Renamed inner project; published source
+├── assets/                 # External assets and runtime directories
+├── records/                # Historical experiments, rename backups, and validation
+└── .trace-engineering-venv/ # Local engineering environment
 ```
 
-外层目录未改名；Hugging Face 仓库名、模型和数据文件也未改名。
-改名前源码备份和逐文件清单位于外层 `records/project-renaming/2026-10-09/`。
+The outer directory, Hugging Face repository names, models, and data filenames were
+not renamed. Pre-rename source backups and file inventories reside in the outer
+`records/project-renaming/2026-10-09/` directory.
+The GitHub repository is now `bitzone910/Trace-OPSD`.
 
-## 当前接口
+## Current interfaces
 
-| 对象 | 名称 |
+| Component | Name |
 |---|---|
-| Python 包/导入 | `trace_opsd` |
-| 安装包/Conda | `trace-opsd` |
-| 环境变量 | `TRACE_OPSD_` 前缀 |
+| Python package/imports | `trace_opsd` |
+| Distribution/Conda | `trace-opsd` |
+| Environment variables | `TRACE_OPSD_` prefix |
 | W&B project | `Trace-OPSD` |
-| Python 执行用户 | `trace-opsd-exec` |
-| 工具服务 | `trace-opsd-tool-server` |
-| 索引构建 | `trace-opsd-general-index` |
-| 检索服务 | `trace-opsd-general-server` |
+| Python executor user | `trace-opsd-exec` |
+| Tool service | `trace-opsd-tool-server` |
+| Index builder | `trace-opsd-general-index` |
+| Retrieval service | `trace-opsd-general-server` |
 | SFT | `trace-opsd-sft` |
 | TRACE | `trace-opsd-train` |
 | Evaluation | `trace-opsd-eval` |
 
-四个 Bash 入口文件名保留：`setup_env.sh`、`run_sft.sh`、
-`run_trace_curriculum.sh`、`run_eval_suite.sh`。动态导入、agent 注册和环境配置使用
-新名称。旧 Python 包、命令及环境变量不提供别名；检测到旧项目环境变量时会报错，
-应在新终端移除旧变量并设置新变量，避免误用资源目录。
+The four Bash filenames remain `setup_env.sh`, `run_sft.sh`,
+`run_trace_curriculum.sh`, and `run_eval_suite.sh`. Dynamic imports, agent
+registration, and environment configuration use the new identifiers. Old Python
+packages, commands, and environment variables have no aliases. Legacy project
+environment variables cause an error; remove them in a fresh terminal and set
+the new variables to avoid resolving the wrong asset directories.
 
-新产物使用 `trace_opsd_grpo_run.json`、`trace_opsd_protocol.json`、
-`trace_opsd_grpo_manifest.json`；新的 schema/protocol 采用 `trace_opsd.*`。
+New artifacts use `trace_opsd_grpo_run.json`, `trace_opsd_protocol.json`, and
+`trace_opsd_grpo_manifest.json`. New schema/protocol identities use `trace_opsd.*`.
 
-## 历史文件读取
+## Reading historical files
 
-`trace_opsd.compat` 集中识别历史文件名、schema、信用版本和指标名。读取时返回
-历史 JSON 原值，不改写原文件，不重新计算其来源摘要。新旧元数据同时存在且内容
-不一致时明确报错；仅命名空间差异可视为同一身份。
+`trace_opsd.compat` handles historical filenames, schemas, credit versions, and
+metric names. It returns original historical JSON values without rewriting files
+or recomputing provenance digests. Conflicting old/new metadata causes an explicit
+error; namespace-only differences can represent the same identity.
 
-旧 checkpoint 可校验及导出。导出创建新目录、新协议文件，同时保留实际历史
-算法版本、信用配置、来源 step 和数据摘要。不会把历史 token 信用模型标为
-turn-mean 模型。旧命名的训练 run 不会被就地迁移；需要继续使用历史权重时，
-先导出完整 HF 模型，再以新 run 名启动当前算法，不迁移历史优化器。
+Historical checkpoints can be verified and exported. Export creates a new directory
+and protocol file while preserving the actual historical algorithm version,
+credit configuration, source step, and data digest. Historical token-credit models
+are not labeled turn-mean models. Legacy-named training runs are not migrated
+in place. To reuse historical weights, export a complete HF model and start the
+current algorithm under a new run name, without migrating the historical optimizer.
 
-历史评测快照与报告保持原格式、协议指纹和分数。已保存的八采样结果可以只读汇总，
-保留其实际评分版本；新生成/重新计分需使用当前代码指纹，不能混入旧目录或将
-历史和新协议强行合并。
+Historical evaluation snapshots/reports retain their original formats, protocol
+fingerprints, and scores. Saved eight-sample results support read-only reporting
+with their actual scorer version. New generation/rescoring requires the current
+code fingerprint; it cannot mix into old directories or force incompatible
+historical/current protocols into one comparison.
 
-以下文件刻意保留历史名称：
+The following intentionally retain historical names:
 
-| 文件 | 保留原因 |
+| File | Reason |
 |---|---|
-| `data/evaluation/manifest.json` | 已封存评测数据的 schema、训练来源路径和摘要 |
-| `configs/assets/manifest.json` | 资产迁移前路径及已记录的文件哈希 |
-| `configs/assets/downloadable-assets.json` | 已发布 HF 资产的固定 commit 和哈希 |
-| `trace_opsd/compat.py` | 历史元数据、离线 W&B 和指标别名读取 |
-| `trace_opsd/assets.py`、`scripts/assets_env.sh` | 检测并拒绝旧环境变量 |
-| verl 的两个项目定制文件 | 直接读取历史 global checkpoint / FSDP DCP schema；第三方模块可独立使用 |
+| `data/evaluation/manifest.json` | Sealed evaluation schema, training-source paths, and digests |
+| `configs/assets/manifest.json` | Pre-migration asset paths and recorded file hashes |
+| `configs/assets/downloadable-assets.json` | Pinned HF commits and hashes for published assets |
+| `trace_opsd/compat.py` | Historical metadata, offline W&B, and metric readers |
+| `trace_opsd/assets.py`, `scripts/assets_env.sh` | Detection and rejection of legacy environment variables |
+| Two project-customized verl files | Direct reading of historical global-checkpoint/FSDP DCP schemas; usable independently by third-party modules |
 
-第三方源码、许可证、上游身份及外层历史归档不批量替换。两个框架的项目 vendor
-元数据改为 `TRACE_OPSD_VENDOR.json`，按实际源码重新计算快照摘要。
+Third-party source, licenses, upstream identities, and outer historical archives
+are preserved. Both frameworks' project vendor metadata files are named
+`TRACE_OPSD_VENDOR.json`, with snapshot digests recalculated from actual source.
 
 ## AutoDL
 
-上传整个当前源码目录至 `/root/autodl-tmp/Trace-OPSD/`，准备完整外部资产目录。
-本地已按先前要求删除部分可恢复资产；仅上传源码不能补齐模型、训练数据及索引，
-固定版本恢复方法见 [资产说明](assets.md)。
+Place the current source in `/root/autodl-tmp/Trace-OPSD/` and prepare a complete
+external asset directory. Some recoverable local assets were previously removed
+as requested; source upload alone does not restore models, training data, or indices.
+See [External assets](assets.md) for pinned recovery instructions.
 
 ```bash
 cd /root/autodl-tmp/Trace-OPSD
@@ -92,7 +104,7 @@ bash scripts/run_trace_curriculum.sh --assets-root "$ASSETS" --work-root "$WORK"
   --run-name trace-math --model-path "$WORK/exports/sft/sft-math/final" \
   --after-step 0 --mid-per-step 16 --high-per-step 16 --resume none
 
-# 复制并填写模型清单后进行评测
+# Copy and fill in the model list before evaluation.
 mkdir -p "$WORK"
 cp configs/evaluation/models.example.yaml "$WORK/evaluation-models.yaml"
 bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
@@ -100,17 +112,26 @@ bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --output-root "$WORK/evaluation/math-comparison"
 ```
 
-难度配比 16/16 为示例。可指定已有完整 HF SFT/历史导出模型作为 TRACE 初始权重；
-不要把 DCP 训练目录当作 HF 模型。详细参数仍以四个入口的 `--help` 为准。
+The 16/16 difficulty mix is an example. A complete SFT or historical HF export can
+serve as initial TRACE weights. A DCP training directory is not an HF model.
+Refer to the four launchers' `--help` for current arguments.
 
-## 本次验证
+## Rename validation
 
-- 新包 editable 安装、六个命令帮助、四个 Bash 入口帮助及全部 Bash 语法通过。
-- CPU 回归 684 项通过、1 项因 Windows Gloo 支持限制跳过；新增改名兼容测试
-  14 项通过。测试工作副本保存在外层记录目录，原始归档未改写。
-- 实际桌面 SFT 与历史 TRACE 模型均通过 HF config/tokenizer/分片检查，
-  各 434 个 tensor 均为 BF16；未加载到 GPU。
-- 1,587 项保护文件校验无差异（含两份实验主归档）；固定评测共 1,909 题。
-- 优势重塑、Python 错误惩罚、证据统计和工具提示词的关键函数 AST 与改名前一致。
-- 两个完整 vendor 快照重新校验通过。未执行 A800 训练、推理或实际 Linux 安装，
-  未提交或推送 GitHub，也未修改 HF 仓库。
+- Editable installation of the new package, six command help checks, four Bash
+  launcher help checks, and all Bash syntax checks passed.
+- CPU regression: 684 passed, one skipped for Windows Gloo limitations; 14 new
+  rename-compatibility cases passed. Working test copies are external records;
+  original archives were not rewritten.
+- Real local SFT and historical TRACE models passed HF config/tokenizer/shard
+  checks. Each had 434 BF16 tensors; neither was loaded onto a GPU.
+- All 1,587 protected files matched their original hashes, including both main
+  experiment archives. The fixed evaluation snapshot contains 1,909 questions.
+- Key ASTs for advantage shaping, Python error penalties, evidence statistics,
+  and tool prompts matched the pre-rename versions.
+- Both complete vendor snapshots passed verification. A800 training, inference,
+  and actual Linux installation were not run during rename validation. That
+  validation did not change HF repositories.
+
+The source was subsequently committed and pushed to GitHub, and the repository
+was renamed to [Trace-OPSD](https://github.com/bitzone910/Trace-OPSD).

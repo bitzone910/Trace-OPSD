@@ -1,5 +1,7 @@
-# SFT输入
+# SFT Input
 
-正式输入已放在外部资产目录 `datasets/sft/sft_math_tir.json`。
-30,438条 `instruction/input/output` Alpaca记录全部训练，使用qwen模板及15,000序列截断。
-本目录不存完整训练数据或生成产物。数据准备、预检和导出见 `docs/sft.md`。
+The full dataset is stored externally at `datasets/sft/sft_math_tir.json` under the
+asset root. All 30,438 Alpaca records with `instruction/input/output` fields are
+used for training with the `qwen` template and a 15,000-token sequence cutoff.
+This directory does not contain full training data or generated artifacts.
+See [SFT](../../docs/sft.md) for data preparation, preflight, and export.

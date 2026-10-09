@@ -1,16 +1,22 @@
-# Trace-OPSD 仓库协作指引
+# Trace-OPSD Repository Guidelines
 
-## 项目上下文
+## Project context
 
-- 在开始任何与 Trace-OPSD 有关的分析、规划、实现或评审之前，必须先完整阅读根目录
-  的 `PROJECT_OVERVIEW.md`。
-- 将 `PROJECT_OVERVIEW.md` 作为项目目标、核心术语、总体路线和当前进度的基准。
-- 判断组件是否已经实现时，必须同时检查仓库中的实际代码和验证结果；不得将大纲中
-  的规划项视为已经完成。
-- 项目方向或进度发生变化时，仅在实际实现得到验证且项目维护者确认后更新大纲。
+- Before any Trace-OPSD analysis, planning, implementation, or review, read the
+  root `PROJECT_OVERVIEW.md` in full.
+- Treat `PROJECT_OVERVIEW.md` as the reference for project goals, terminology,
+  overall direction, and current progress.
+- To determine whether a component is implemented, inspect both its actual code
+  and validation results. Planned items in the overview are not completed work.
+- Update the overview when project direction or progress changes only after the
+  implementation has been validated and the maintainer has confirmed the change.
 
-## 文档职责
+## Documentation responsibilities
 
-- `PROJECT_OVERVIEW.md` 记录项目整体构思、训练路线和实现状态。
-- `README.md` 继续记录当前已完成的 General Search 与 Theorem Search 数据库的使用
-  方法；除非任务明确要求，否则不要把项目整体大纲重复写入 `README.md`。
+- `PROJECT_OVERVIEW.md` describes the overall design, training workflow, and
+  implementation status.
+- `README.md` documents usage of the implemented General Search and Theorem Search
+  databases. Do not duplicate the entire project overview there unless the task
+  explicitly requests it.
+- Write project-owned README files and documentation in English. Preserve upstream
+  third-party documentation and license text in their original form.
