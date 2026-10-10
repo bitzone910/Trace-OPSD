@@ -138,58 +138,58 @@ The actor optimizes a clipped GRPO objective with shaped advantages:
 
 **Algorithm 1 — TRACE-OPSD with Turn-Mean Credit Assignment**
 
-**Require:** Initial policy `pi_theta`; fixed reference policy `pi_ref`; Python and Search tools `T`; mathematical verifier `V`; training steps `S`; group size `G`; accepted problem count `B`; stage difficulty quotas; replenishment limit; credit scale `tau > 0`; turn coefficients `lambda_tool` and `lambda_final`; optional Python-error penalty `alpha`.
+**Require:** Initial policy $`\pi_\theta`$; fixed reference policy $`\pi_{\mathrm{ref}}`$; Python and Search tools $`\mathcal T`$; mathematical verifier $`V`$; training steps $`S`$; group size $`G`$; accepted problem count $`B`$; stage difficulty quotas and replenishment limit; credit scale $`\tau\gt0`$; turn coefficients $`\lambda_{\mathrm{tool}},\lambda_{\mathrm{final}}`$; optional Python-error penalty $`\alpha`$.
 
-**Input:** Dataset `D = {(x, y*, H_x)}`, where `x` is a problem, `y*` is its verification target, and `H_x` is an offline solution outline.
+**Input:** Dataset $`D=\{(x,y^\star,H_x)\}`$, where $`x`$ is a problem, $`y^\star`$ is its verification target, and $`H_x`$ is an offline solution outline.
 
-```text
-01: for step s = 1, ..., S do
-02:     pi_old <- snapshot(pi_theta); accepted <- empty batch
-03:     repeat until B complete groups satisfy the stage difficulty quotas
-04:         Sample candidate problems x from D
-05:         Generate G multi-turn trajectories per x with pi_old and tools T
-06:             // Rollout sees x and tool observations, never y* or H_x
-07:         R_i <- V(final_answer_i, y*) for each trajectory i
-08:         Retain complete groups containing both correct and incorrect answers
-09:         Abort this step if the replenishment limit is reached before completion
-10:     end repeat
-11:     for each accepted problem group do
-12:         A_i <- (R_i - mean_j(R_j)) / (std_j(R_j) + epsilon)
-13:         A0[i, t] <- A_i for all valid generated tokens in trajectory i
-14:     end for
-15:     A_final <- copy(A0)
-16:     Recompute causal token log-probabilities with pi_old as old_log_probs
-17:     for each assistant turn k in each accepted trajectory i do
-18:         I_k <- exact generated-token span of the entire assistant turn
-19:         Assert valid, non-overlapping spans and constant A0 within I_k
-20:         if H_x exists and aligned scoring views fit the scoring budget then
-21:             ell_c[t] <- old_log_probs[i, t] for t in I_k
-22:             ell_h[t] <- log pi_old(a_t | h_k, H_x, a_<t) for t in I_k
-23:             e_bar <- mean_t(ell_h[t] - ell_c[t])
-24:             c_k <- max(0, tanh(e_bar / tau))
-25:             lambda_k <- lambda_final if k is final, otherwise lambda_tool
-26:             w_k <- 1 + lambda_k * sign(A_i) * c_k
-27:             A_final[i, t] <- A0[i, t] * w_k for every t in I_k
-28:                 // ONE shared weight for ALL generated tokens in turn k
-29:         end if
-30:             // Missing hindsight or unscoreable views retain the base advantage
-31:         if Python-error penalty is enabled and k is a trusted failed Python turn then
-32:             A_final[i, t] <- min(A_final[i, t], 0) - alpha * abs(A0[i, t])
-33:                 for every t in I_k
-34:         end if
-35:     end for
-36:     Detach A_final; assert finite values and preserve the original dtype/device
-37:     Update pi_theta with the token-wise clipped GRPO/PPO objective using A_final
-38:         and the configured reference-KL loss against pi_ref
-39:     Synchronize rollout weights; save metrics and scheduled checkpoints/validation
-40: end for
-```
+| Line | Procedure |
+| ---: | :--- |
+| 1 | **for** step $`s=1,\ldots,S`$ **do** |
+| 2 | &nbsp;&nbsp;&nbsp;&nbsp;$`\pi_{\mathrm{old}}\leftarrow\pi_\theta`$; initialize an empty accepted batch |
+| 3 | &nbsp;&nbsp;&nbsp;&nbsp;**repeat until** $`B`$ complete groups satisfy the stage difficulty quotas |
+| 4 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sample candidate problems $`x`$ from $`D`$ |
+| 5 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generate $`G`$ multi-turn trajectories per problem with $`\pi_{\mathrm{old}}`$ and $`\mathcal T`$ |
+| 6 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▷ Rollout sees the problem and tool observations, never $`y^\star`$ or $`H_x`$ |
+| 7 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`R_i\leftarrow V(y_i,y^\star)`$ for each trajectory $`i`$ |
+| 8 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Retain complete groups containing both correct and incorrect answers |
+| 9 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort the step if the replenishment limit is reached before completion |
+| 10 | &nbsp;&nbsp;&nbsp;&nbsp;**end repeat** |
+| 11 | &nbsp;&nbsp;&nbsp;&nbsp;**for each** accepted problem group **do** |
+| 12 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`A_i\leftarrow\frac{R_i-\mathrm{mean}_j(R_j)}{\mathrm{std}_j(R_j)+\epsilon}`$ |
+| 13 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`A^0_{i,t}\leftarrow A_i`$ for all valid generated tokens in trajectory $`i`$ |
+| 14 | &nbsp;&nbsp;&nbsp;&nbsp;**end for** |
+| 15 | &nbsp;&nbsp;&nbsp;&nbsp;$`A^{\mathrm{final}}\leftarrow A^0`$ |
+| 16 | &nbsp;&nbsp;&nbsp;&nbsp;Recompute causal token log-probabilities with $`\pi_{\mathrm{old}}`$ as `old_log_probs` |
+| 17 | &nbsp;&nbsp;&nbsp;&nbsp;**for each** assistant turn $`k`$ in each accepted trajectory $`i`$ **do** |
+| 18 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`I_{i,k}\leftarrow`$ exact generated-token span of the entire assistant turn |
+| 19 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assert valid, non-overlapping spans and constant $`A^0`$ within $`I_{i,k}`$ |
+| 20 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**if** $`H_x`$ exists and aligned scoring views fit the scoring budget **then** |
+| 21 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`\ell^c_{i,k,t}\leftarrow`$ `old_log_probs` for $`t\in I_{i,k}`$ |
+| 22 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`\ell^h_{i,k,t}\leftarrow\log\pi_{\mathrm{old}}(a_{i,k,t}\mid h_{i,k},H_x,a_{i,k,\lt t})`$ |
+| 23 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`\bar e_{i,k}\leftarrow\frac{1}{\lvert I_{i,k}\rvert}\sum_{t\in I_{i,k}}(\ell^h_{i,k,t}-\ell^c_{i,k,t})`$ |
+| 24 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`c_{i,k}\leftarrow\max(0,\tanh(\bar e_{i,k}/\tau))`$ |
+| 25 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`\lambda_k\leftarrow\lambda_{\mathrm{final}}`$ for final turns; otherwise $`\lambda_{\mathrm{tool}}`$ |
+| 26 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`w_{i,k}\leftarrow1+\lambda_k\mathrm{sign}(A_i)c_{i,k}`$ |
+| 27 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`A^{\mathrm{final}}_{i,t}\leftarrow A^0_{i,t}w_{i,k}`$ for every $`t\in I_{i,k}`$ |
+| 28 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▷ **One shared weight for all generated tokens in the turn** |
+| 29 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**end if** |
+| 30 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;▷ Missing hindsight or unscoreable views retain the base advantage |
+| 31 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**if** Python-error penalty is enabled and $`k`$ is a trusted failed Python turn **then** |
+| 32 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$`A^{\mathrm{final}}_{i,t}\leftarrow\min(A^{\mathrm{final}}_{i,t},0)-\alpha\lvert A^0_{i,t}\rvert`$ |
+| 33 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for every $`t\in I_{i,k}`$ |
+| 34 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**end if** |
+| 35 | &nbsp;&nbsp;&nbsp;&nbsp;**end for** |
+| 36 | &nbsp;&nbsp;&nbsp;&nbsp;Detach $`A^{\mathrm{final}}`$; assert finite values and preserve the original dtype/device |
+| 37 | &nbsp;&nbsp;&nbsp;&nbsp;Update $`\pi_\theta`$ with the token-wise clipped GRPO/PPO objective using $`A^{\mathrm{final}}`$ |
+| 38 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and the configured reference-KL loss against $`\pi_{\mathrm{ref}}`$ |
+| 39 | &nbsp;&nbsp;&nbsp;&nbsp;Synchronize rollout weights; save metrics and scheduled checkpoints/validation |
+| 40 | **end for** |
 
-**Output:** Trained policy `pi_theta`; inference uses the problem and tools without hindsight.
+**Output:** Trained policy $`\pi_\theta`$; inference uses the problem and tools without hindsight.
 
 ---
 
-Each `I_k` includes the turn's reasoning, action tags, code or query, and final-answer content where applicable; it excludes tool observations and padding. Both scoring views use the **same policy snapshot, sampled tokens, and scoring temperature**; `tau` is the credit scale, not the sampling temperature. Credit computation is detached, so only the policy objective contributes update gradients.
+Each $`I_{i,k}`$ includes the turn's reasoning, action tags, code or query, and final-answer content where applicable; it excludes tool observations and padding. Both scoring views use the **same policy snapshot, sampled tokens, and scoring temperature**; $`\tau`$ is the credit scale, not the sampling temperature. Credit computation is detached, so only the policy objective contributes update gradients.
 
-Default settings are `G = 8`, `B = 32`, `tau = 1`, `lambda_tool = 0.5`, `lambda_final = 0.25`, and `alpha = 0.25`. The Python-error penalty is an optional implementation feature applied **after** OPSD scaling, independently of hindsight availability. It uses trusted structured execution outcomes, affects only the failed assistant turn, and leaves later repair turns separate; queue, transport, and bootstrap failures are excluded.
+Default settings are $`G=8`$, $`B=32`$, $`\tau=1`$, $`\lambda_{\mathrm{tool}}=0.5`$, $`\lambda_{\mathrm{final}}=0.25`$, and $`\alpha=0.25`$. The Python-error penalty is an optional implementation feature applied **after** OPSD scaling, independently of hindsight availability. It uses trusted structured execution outcomes, affects only the failed assistant turn, and leaves later repair turns separate; queue, transport, and bootstrap failures are excluded.
 
