@@ -136,5 +136,3 @@ The actor optimizes a clipped GRPO objective with shaped advantages:
 
 ![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment, in 22 numbered steps](images/trace-opsd-algorithm.png)
 
-`DynamicSample` retains complete mixed-reward groups under the stage difficulty quotas and replenishment limit. Turn spans include generated assistant tokens only; tool observations and padding are excluded. The optional Python-error penalty is applied after OPSD scaling and only to the failed turn.
-
