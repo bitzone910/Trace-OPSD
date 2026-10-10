@@ -1,4 +1,4 @@
-# SFT on Four A800 GPUs
+# SFT 
 
 Start from a prepared, complete Qwen2.5-3B-Instruct HF directory. Preserve supervision over each
 complete `output`, including reasoning, tool actions, and results.
