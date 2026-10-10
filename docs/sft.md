@@ -1,15 +1,7 @@
 # SFT on Four A800 GPUs
 
-Start from a prepared, complete Qwen2.5-3B-Instruct HF directory and read Alpaca
-records with `instruction/input/output` fields. Preserve supervision over each
-complete `output`, including reasoning, tool actions, and results. Records are not
-implicitly split into ShareGPT turns, and tool feedback is not removed.
-
-All 30,438 records are used for training by default. There is no validation split
-or selection by `eval_loss`. The LLaMA-Factory template is `qwen`, with
-`cutoff_len=15000` and its native truncation rules. Preflight records truncation
-counts. The cutoff covers the input and full output; static SFT has no online
-tool-call or rollout generation budget.
+Start from a prepared, complete Qwen2.5-3B-Instruct HF directory. Preserve supervision over each
+complete `output`, including reasoning, tool actions, and results.
 
 | Setting | Default |
 |---|---:|
@@ -18,11 +10,6 @@ tool-call or rollout generation budget.
 | Learning rate / epochs | 7e-6 / 3 |
 | Scheduler / warmup_ratio | cosine / 0.1 |
 | logging_steps / save_steps | 10 / 2000 |
-
-These values follow the actual Tool-Star training YAML inspected locally.
-Its eight-GPU batch-1, accumulation-2 setup becomes accumulation 4 on four GPUs,
-preserving an effective batch of 16. Trace-OPSD retains its existing FSDP1 backend
-and checkpoint management rather than adding a second ZeRO backend.
 
 ```bash
 bash scripts/run_sft.sh validate --assets-root ../assets
