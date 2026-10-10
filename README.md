@@ -7,9 +7,9 @@ A post-training framework for multi-turn mathematical reasoning: **SFT → TRACE
 
 ## Evaluation results
 
-![Mathematical reasoning results for Trace-OPSD, SFT, and Qwen2.5-3B-Instruct, with Pass@1, Pass@8, and Avg@8 columns under each benchmark](docs/images/evaluation-comparison.png)
+![Results for Qwen-2.5-3B, SFT, and Trace-OPSD, with Pass@1 and Avg@8 columns under each benchmark](docs/images/evaluation-comparison.png)
 
-All scores are percentages. **Pass@1** uses greedy decoding; **Pass@8** measures whether at least one of eight sampled trajectories is correct; **Avg@8** measures their average accuracy. The sampling protocol uses temperature 0.7 and top-p 0.95. All three models use BF16 inference and the same tool and token budgets.
+All scores are percentages. **Pass@1** uses greedy decoding; **Avg@8** measures average accuracy across eight sampled trajectories per question, using temperature 0.7 and top-p 0.95. Qwen-2.5-3B denotes Qwen2.5-3B-Instruct. All three models use BF16 inference and the same tool and token budgets.
 
 [Download the table values (CSV)](docs/evaluation-results.csv). The AIME26 snapshot includes one recorded exact overlap with the training source.
 
