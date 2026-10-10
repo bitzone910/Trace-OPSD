@@ -20,7 +20,6 @@ A post-training framework for multi-turn mathematical reasoning.
 |---|---|---|
 | RL training data | [rl_trace_opsd](https://huggingface.co/datasets/BitZone910/rl_trace_opsd) | Mathematics problems with hindsight, including fixed training and validation splits. |
 | SFT training data | [sft_math_tir](https://huggingface.co/datasets/BitZone910/sft_math_tir) | Tool-integrated mathematical reasoning examples for SFT. |
-| Encyclopedia retrieval corpus | [wiki_math](https://huggingface.co/datasets/BitZone910/wiki_math) | Mathematical encyclopedia knowledge for the Search tool. |
 
 ## Evaluation results
 
