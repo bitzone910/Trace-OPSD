@@ -13,8 +13,6 @@ A post-training framework for multi-turn mathematical reasoning: **SFT → TRACE
 
 ![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment in 22 numbered steps](docs/images/trace-opsd-algorithm.png)
 
-[Read the method description](docs/trace-opsd-method.md). The diagram describes the current turn-mean implementation; the evaluation table uses a historical checkpoint.
-
 ## Assets and runtime directories
 
 ```text
