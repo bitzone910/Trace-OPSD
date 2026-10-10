@@ -16,9 +16,3 @@ bash scripts/run_sft.sh validate --assets-root ../assets
 bash scripts/run_sft.sh train --assets-root ../assets --run-name sft-math
 ```
 
-The default model is `../assets/models/Qwen2.5-3B-Instruct` and the dataset is
-`../assets/datasets/sft/sft_math_tir.json`. Override them with `--model-path` and
-`--dataset-file`. Checkpoints reside in `<work>/checkpoints/sft/<run>`; the latest
-two are retained. On completion, a separate process exports a complete HF model to
-`<work>/exports/sft/<run>/final`. See `--help` for recovery and standalone export.
-Preflight continues to verify data, model, tokenizer, and environment.
