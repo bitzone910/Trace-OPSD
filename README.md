@@ -49,14 +49,7 @@ bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --models-file "$WORK/evaluation-models.yaml" --protocol all \
   --output-root "$WORK/evaluation/math-comparison"
 ```
-
-## Algorithm and evaluation
-
-The current TRACE algorithm averages raw teacher–student log-probability gaps within each assistant turn,
-computes one credit weight, and broadcasts that weight to every valid generated
-token in the turn. 
-
-## Documentation and validation
+## Documentation 
 
 - [SFT](docs/sft.md), [TRACE training](docs/trace-training.md), [Algorithm](docs/trace-opsd-method.md)
 - [Evaluation](docs/evaluation.md)
