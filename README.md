@@ -54,5 +54,5 @@ bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
 ```
 ## Documentation 
 
-- [SFT](docs/sft.md), [TRACE training](docs/trace-training.md), [Algorithm](docs/trace-opsd-method.md)
+- [SFT](docs/sft.md),[Algorithm](docs/trace-opsd-method.md)
 - [Evaluation](docs/evaluation.md)
