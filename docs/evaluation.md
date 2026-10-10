@@ -1,13 +1,6 @@
-# Mathematical Evaluation
-
-The public launcher `scripts/run_eval_suite.sh` loads complete Hugging Face model
-directories sequentially from an explicit model list. Export training DCP
-checkpoints at the desired step through the TRACE export entry point first.
-
 ## Model list and external resources
 
-Copy `configs/evaluation/models.example.yaml` into the work directory. Fill in
-safe, unique names and model paths, and remove all placeholders. `baseline` is
+Copy `configs/evaluation/models.example.yaml` into the work directory. `baseline` is
 optional; when specified, it must appear in the list and is used for percentage-point
 changes in reports.
 
@@ -37,10 +30,6 @@ Results must reside outside the source repository.
 The `data/evaluation` snapshot contains 30 questions each from AIME24/25/26,
 500 from MATH500, and 1,319 from GSM8K: 1,909 questions per model. Every run verifies
 the data digest and preserves exact training-overlap flags. 
-
-Explicitly select `--protocol greedy|sampling8|all`. Greedy evaluation uses
-temperature 0, top_p=1, top_k=-1, and seed 42 to report greedy Pass@1. See
-[Eight-sample evaluation](evaluation-sampling.md) for sampling settings and metrics.
 
 ```bash
 bash scripts/run_eval_suite.sh \
