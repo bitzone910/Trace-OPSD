@@ -11,7 +11,7 @@ A post-training framework for multi-turn mathematical reasoning.
 
 | Model | Hugging Face | Description |
 |---|---|---|
-| Trace-OPSD | [Trace-OPSD-Qwen2.5-3B](https://huggingface.co/BitZone910/Trace-OPSD-Qwen2.5-3B) | BF16 mathematical reasoning model trained with TRACE-OPSD. |
+| Trace-OPSD | [Trace-OPSD-Qwen2.5-3B](https://huggingface.co/BitZone910/Trace-OPSD-Qwen2.5-3B) | Mathematical reasoning model trained with TRACE-OPSD. |
 | SFT | [SFT-Qwen2.5-3B](https://huggingface.co/BitZone910/SFT-Qwen2.5-3B) | Supervised fine-tuning model used to initialize TRACE-OPSD training. |
 
 ### Datasets and retrieval resources
@@ -20,8 +20,6 @@ A post-training framework for multi-turn mathematical reasoning.
 |---|---|---|
 | RL training data | [rl_trace_opsd](https://huggingface.co/datasets/BitZone910/rl_trace_opsd) | Mathematics problems with hindsight, including fixed training and validation splits. |
 | SFT training data | [sft_math_tir](https://huggingface.co/datasets/BitZone910/sft_math_tir) | Tool-integrated mathematical reasoning examples for SFT. |
-| Additional TIR data | [NuminaMath-TIR](https://huggingface.co/datasets/BitZone910/NuminaMath-TIR) | Additional mathematical tool-integrated reasoning dataset. |
-| Theorem retrieval corpus | [theorem_math](https://huggingface.co/datasets/BitZone910/theorem_math) | Mathematical theorems and lemmas for the Search tool. |
 | Encyclopedia retrieval corpus | [wiki_math](https://huggingface.co/datasets/BitZone910/wiki_math) | Mathematical encyclopedia knowledge for the Search tool. |
 
 ## Evaluation results
