@@ -4,7 +4,6 @@ A post-training framework for multi-turn mathematical reasoning: **SFT → TRACE
 
 ![TRACE-OPSD: turn-level credit assignment for multi-turn mathematical reasoning](docs/images/trace-opsd-overview.png)
 
-The current turn-mean mechanism averages raw teacher–student log-probability gaps within each assistant turn and applies one shared weight to its token advantages. See the [algorithm details](docs/trace-opsd-method.md).
 
 ## Assets and runtime directories
 
