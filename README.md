@@ -1,9 +1,6 @@
 # Trace-OPSD
 
-Dual-tool post-training for multi-turn mathematical reasoning: **SFT → TRACE-OPSD → evaluation**.
-
-The model invokes tools with `<python>...</python>` or `<search>...</search>` and
-returns a final answer as `<answer>...\boxed{...}</answer>`. 
+A post-training framework for multi-turn mathematical reasoning: **SFT → TRACE-OPSD → evaluation**.
 
 ## Assets and runtime directories
 
@@ -53,24 +50,11 @@ bash scripts/run_eval_suite.sh --assets-root "$ASSETS" --work-root "$WORK" \
   --output-root "$WORK/evaluation/math-comparison"
 ```
 
-## Default training and inference settings
-
-| Setting | SFT | TRACE / evaluation |
-|---|---|---|
-| Precision | Full-parameter BF16 training | BF16 inference; full-parameter TRACE training |
-| Token budgets | Full training sequence truncated at 15,000 | Context 8192; total response 4096; generation per turn 1024; observation 512 |
-| Tool calls | Prepared tool trajectories; no online generation budget | At most 5 calls; stop after 2 consecutive invalid actions |
-| Data / sampling | All 30,438 Alpaca records used for training | TRACE: 32 accepted problem groups per step, 8 trajectories per problem |
-| Optimization | Batch 1 per GPU; accumulation 4; LR 7e-6; 3 epochs; cosine; warmup 0.1 | LR 5e-7; 50 warmup steps; cosine minimum ratio 0.1; KL coefficient 0.005 |
-
 ## Algorithm and evaluation
 
 The current TRACE algorithm averages raw teacher–student log-probability gaps within each assistant turn,
 computes one credit weight, and broadcasts that weight to every valid generated
 token in the turn. 
-
-The fixed evaluation snapshot covers GSM8K, MATH500, and AIME24/25/26, totaling
-1,909 questions. 
 
 ## Documentation and validation
 
