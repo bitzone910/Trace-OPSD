@@ -7,7 +7,7 @@ A post-training framework for multi-turn mathematical reasoning: **SFT → TRACE
 
 ## Evaluation results
 
-![Mathematical reasoning results for TRACE-OPSD step400, SFT, and Qwen2.5-3B-Instruct, grouped by benchmark and metric](docs/images/evaluation-comparison.png)
+![Mathematical reasoning results for Trace-OPSD, SFT, and Qwen2.5-3B-Instruct, with Pass@1, Pass@8, and Avg@8 columns under each benchmark](docs/images/evaluation-comparison.png)
 
 All scores are percentages. **Pass@1** uses greedy decoding; **Pass@8** measures whether at least one of eight sampled trajectories is correct; **Avg@8** measures their average accuracy. The sampling protocol uses temperature 0.7 and top-p 0.95. All three models use BF16 inference and the same tool and token budgets.
 
@@ -17,7 +17,7 @@ All scores are percentages. **Pass@1** uses greedy decoding; **Pass@8** measures
 
 ![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment in 22 numbered steps](docs/images/trace-opsd-algorithm.png)
 
-[Read the method description](docs/trace-opsd-method.md). The diagram describes the current turn-mean implementation; the evaluation table uses the historical step400 checkpoint.
+[Read the method description](docs/trace-opsd-method.md). The diagram describes the current turn-mean implementation; the evaluation table uses a historical checkpoint.
 
 ## Assets and runtime directories
 
