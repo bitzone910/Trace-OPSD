@@ -1,6 +1,6 @@
 # Trace-OPSD
 
-### A post-training framework for multi-turn mathematical reasoning.
+### A post-training framework for multi-turn mathematical reasoning
 
 ![TRACE-OPSD: turn-level credit assignment for multi-turn mathematical reasoning](docs/images/trace-opsd-overview.png)
 
