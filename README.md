@@ -25,8 +25,6 @@ A post-training framework for multi-turn mathematical reasoning.
 
 ![Accuracy comparison of Qwen-2.5-3B, SFT, and Trace-OPSD on GSM8K, MATH500, AIME24, AIME25, AIME26, and OlympiadBench, with mean accuracy in the Avg column](docs/images/evaluation-comparison.png)
 
-**Acc (accuracy)** is the percentage of correct answers with greedy decoding. **Avg** is the equal-weight mean across the six benchmarks, calculated before rounding. [Protocol, counts, and data notes](docs/evaluation-results.md).
-
 ## Algorithm pseudocode
 
 ![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment in 22 numbered steps](docs/images/trace-opsd-algorithm.png)
