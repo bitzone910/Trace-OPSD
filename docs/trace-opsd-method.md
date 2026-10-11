@@ -134,5 +134,5 @@ The actor optimizes a clipped GRPO objective with shaped advantages:
 
 ## 6. Algorithm pseudocode
 
-![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment, in 22 numbered steps](images/trace-opsd-algorithm.png)
+![Algorithm 1: TRACE-OPSD training with turn-mean credit assignment, in 19 numbered steps](images/trace-opsd-algorithm.png)
 
