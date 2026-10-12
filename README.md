@@ -23,7 +23,7 @@
 
 ## Evaluation results
 
-![Accuracy comparison of Qwen-2.5-3B, SFT, and Trace-OPSD on GSM8K, MATH500, AIME24, AIME25, AIME26, and OlympiadBench, with mean accuracy in the Avg column](docs/images/evaluation-comparison.png)
+![Accuracy comparison of Qwen-2.5-3B, SFT, and Trace-OPSD on GSM8K, MATH500, AIME24, AIME25, AIME26, and OlympiadBench, with overall accuracy (total correct answers divided by total questions) in the Avg column](docs/images/evaluation-comparison.png)
 
 ## Algorithm pseudocode
 
